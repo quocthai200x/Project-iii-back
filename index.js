@@ -22,7 +22,9 @@ app.use(cors({
 app.use(morgan("dev"))
 require("./config/passport")
 app.use(router)
-
+app.get('/', function(req, res, next){
+    res.send('<h1>Đã kết nối</h1>')
+})
 
 // app.use(express.static("static"));
 app.use("/static", express.static(path.join(__dirname + '/static')));
