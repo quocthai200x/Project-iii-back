@@ -9,7 +9,7 @@ var app = express();
 var morgan = require("morgan")
 var router = require("./application/router")
 var path = require("path")
-const port = process.env.port || 5000;
+const port = process.env.port || 6969;
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
