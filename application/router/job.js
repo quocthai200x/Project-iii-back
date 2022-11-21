@@ -1,0 +1,122 @@
+var express = require("express")
+var jobService = require("../../domain/service/jobService")
+var router = express.Router()
+var auth = require("../../config/auth")
+const authorize = require("../../config/authorize")
+var searchService = require("../../domain/service/searchService")
+
+
+//  create new post
+
+
+
+router.post('/', auth.required,authorize.canWriteRecruitment ,async  (req, res) => {
+    try {
+        const {companyId} = req;
+        const createdJob = await jobService.create(companyId, req.body);
+        res.json(createdJob);
+
+    } catch (err) {
+        res.status(400);
+        res.json({
+            code: err.message
+        })
+    }
+})
+
+// update
+router.put('/', auth.required,authorize.canWriteRecruitment ,async  (req, res) => {
+    try {
+        const {companyId} = req;
+        const {info,jobName} = req.body;
+        const updatedJob = await jobService.update(companyId, jobName, info);
+        res.json(updatedJob);
+
+    } catch (err) {
+        res.status(400);
+        res.json({
+            code: err.message
+        })
+    }
+})
+
+router.get("/", auth.optinal, async(req, res)=>{
+    try {
+        const {id} = req.query;
+        const jobFound = await jobService.get(id)
+        res.json(jobFound)
+    } catch (err) {
+        res.status(400);
+        res.json({
+            code: err.message
+        })
+    }
+})
+
+router.put('/update-status', auth.required,authorize.canWriteRecruitment ,async  (req, res) => {
+    try {
+        const {companyId} = req;
+        const {status,jobName} = req.body;
+        const updatedJob = await jobService.updateStatus(companyId, jobName, status);
+        res.json(updatedJob);
+
+    } catch (err) {
+        res.status(400);
+        res.json({
+            code: err.message
+        })
+    }
+})
+
+
+// router.get("/",auth.required ,async (req, res) => {
+//     const result = await postService.getPost()
+//     console.log(result)
+//     const listPost = result.map(postModel => (
+//         {
+//             id: postModel.id,
+//             email : postModel._doc.email,
+//             content : postModel._doc.content,
+//             imageUrl : postModel._doc.imageUrl,
+//             // numberOfLike :,
+//         }
+//     ))
+//     res.json(listPost)
+// })
+
+
+// router.post("/:id/like",auth.required,async(req,res)=>{
+//     const {email} = req.payload;
+//     const {id} = req.params 
+//     const like = await postService.like(id,email)
+//     res.json ({
+//         liked :like.indexOf(email)> -1,
+//         numberOfLike : like.length
+//     });
+
+// });
+
+// router.post("/:id/comment",async (req,res)=>{
+//         const {email,content} = req.body;
+//         const {id} = req.params;
+//         await postService.comment(id,email,content);
+//         res.json({
+//             email : email,
+//             content : content,
+//         })
+
+// })
+
+// router.get('/:id/comments',async (req,res)=>{
+//     const {id} = req.params;
+//     const result =  await postService.loadComment(id)
+//     res.json(result)
+//     // res.json(result)
+// })
+
+
+
+
+
+
+module.exports = router
