@@ -15,29 +15,31 @@ router.post("/login", auth.optinal,async (req, res,next) => {
     if(!email || !password){
         res.status(400);
         res.json({
-            message: err.message
+            code: "Please fill field"
         });
+    }else{
+        return  passport.authenticate("local",{session:false},(err,user,next)=>{
+            if(err){
+                console.log(err);
+                res.status(400);
+                res.json({
+                    message: err.message
+                });
+            }
+            if(user){
+                return res.json({
+                    email:user.email,
+                    token : user.generateJWT()
+                })
+            }else if(!user){
+                res.status(400);
+                res.json({
+                    code:"user not found"
+                });
+            }
+        })(req,res,next);
     }
-    return  passport.authenticate("local",{session:false},(err,user,next)=>{
-        if(err){
-            console.log(err);
-            res.status(400);
-            res.json({
-                message: err.message
-            });
-        }
-        if(user){
-            return res.json({
-                email:user.email,
-                token : user.generateJWT()
-            })
-        }else{
-            res.status(400);
-            res.json({
-                code:"user not found"
-            });
-        }
-    })(req,res,next);
+
 })
 
 router.post("/register-user", auth.optinal, async (req, res) => {

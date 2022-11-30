@@ -5,7 +5,7 @@ const roleService = require("../../domain/service/roleService")
 var auth = require("../../config/auth")
 var authorize = require("../../config/authorize")
 
-router.put("/update", auth.required, async (req, res) => {
+router.put("/", auth.required, async (req, res) => {
     const { email } = req.payload;
     try {
         const updateUser = await userService.update(email, req.body);
@@ -25,6 +25,19 @@ router.post("/attach-role", auth.required, authorize.canWriteUserPermission, asy
     try {
         const attached = await roleService.attachRole(roleName, targetEmail, companyId);
         res.json(attached)
+    } catch (err) {
+        res.status(400);
+        res.json({
+            error: err.message
+        });
+    }
+})
+
+
+router.get('/get-all-company-email', async (req, res) =>{
+    try {
+        const allEmail = await userService.getAllEmailCompany();
+        res.json(allEmail)
     } catch (err) {
         res.status(400);
         res.json({

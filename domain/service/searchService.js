@@ -7,19 +7,22 @@ var Role = require('../model/roles')
 
 
 const SearchService = {
-    searchJob: async (body) => {
+    searchJob: async (body,pageNumber) => {
         let query = {};
         if(body.text){
             query.$text = {}
             query.$text.$search = body.text;
+           
         }
-        let newQuery =  {...query,...body.filter}
-        console.log(newQuery)
-        const result = await Job.find(newQuery).select({status: 0})
-            //TO DO: làm thêm filter skip limit offset
-            .populate({path: "companyId", select: {"info.name" : 1, "info.benefits": 1, "info.logo": 1}});
+        let checkDate = { "info.outdate": { $gt: new Date() }}
+        let checkStatus = {'status.value': 0}
+        let newQuery =  {...query,...checkDate ,...body.filter,  ...checkStatus}
+        // console.log(newQuery)
+        const result = await Job.find(newQuery).sort( { score: { $meta: "textScore" } } ).limit(50).skip(50*pageNumber).select({status: 0}).populate({path: "companyId", select: {"info.name" : 1, "info.benefits": 1, "info.logo": 1}});
+        const count = await Job.find(newQuery).count()
+        //TO DO: làm thêm filter skip limit offset
         if(result){
-            return result;
+            return {total: count, data: result};
         }else{
             throw new Error(" error")
         }
@@ -31,7 +34,7 @@ const SearchService = {
             query.$text.$search = body.text;
         }
         let newQuery =  {...query,roleNumber: 0, "info.allowSearchInfo":true, ...body.filter, }
-        console.log(newQuery)
+        // console.log(newQuery)
         const result = await User.find(newQuery).select({info: 1, email: 1})
             //TO DO: làm thêm filter skip limit offset
         if(result){

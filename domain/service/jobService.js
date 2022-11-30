@@ -31,7 +31,7 @@ const jobService = {
         }
     },
     create: async (companyId, jobInfo) => {
-        console.log(jobInfo)
+        // console.log(jobInfo)
         const jobFound = await Job.findOne({companyId, "info.name": jobInfo.name })
         if (jobFound) {
             throw new Error("Job in company existed");
@@ -77,7 +77,26 @@ const jobService = {
             throw new Error("Job not existed");
 
         }
-    }
+    },
+    // updateStatusAllVisible: async () => {
+    //     let show = {
+    //         name: "Đang hiển thị",
+    //         value :0
+    //     }
+    //     const jobFound = await Job.find();
+    //     jobFound.forEach((job,index) =>{
+    //         job.status = show
+    //         let res = job.save();
+    //         if(index == jobFound.length-1){
+    //             if(res){
+    //                 return res
+    //             }else{
+    //                 throw new Error("Lỗi")
+    //             }
+    //         }
+    //     })
+        
+    // }
 }
 
 // const jobService = {

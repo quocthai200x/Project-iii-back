@@ -14,7 +14,7 @@ const port = process.env.port || 6969;
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(cors({
-    origin: ["http://localhost:3000", "https://project-ii-front.netlify.app"],
+    origin: ["http://localhost:5173", "https://project-ii-front.netlify.app"],
     credentials: true
 }
 ))

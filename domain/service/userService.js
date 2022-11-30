@@ -3,6 +3,9 @@ var Users  = require("../model/users")
 
 
 const userService = {
+    getAllEmailCompany: async() =>{
+        return Users.find({roleNumber: 1}).select({email: 1})
+    },
     find: async (email) => {
         return  Users.findOne({email});
     },

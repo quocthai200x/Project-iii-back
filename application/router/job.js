@@ -69,6 +69,18 @@ router.put('/update-status', auth.required,authorize.canWriteRecruitment ,async 
 })
 
 
+// router.put('/update-status-all', async  (req, res) => {
+//     try {
+//         const updatedJob = await jobService.updateStatusAllVisible();
+//         res.json(updatedJob);
+//     } catch (err) {
+//         res.status(400);
+//         res.json({
+//             code: err.message
+//         })
+//     }
+// })
+
 // router.get("/",auth.required ,async (req, res) => {
 //     const result = await postService.getPost()
 //     console.log(result)
