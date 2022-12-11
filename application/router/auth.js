@@ -29,7 +29,7 @@ router.post("/login", auth.optinal,async (req, res,next) => {
             if(user){
                 return res.json({
                     email:user.email,
-                    token : user.generateJWT()
+                    token : user.generateJWT(req)
                 })
             }else if(!user){
                 res.status(400);
@@ -48,7 +48,7 @@ router.post("/register-user", auth.optinal, async (req, res) => {
     try {
         const user = await authService.signUpUser(email, password, name, phone);
         res.json({
-            token: user.generateJWT()
+            token: user.generateJWT(req)
         });
     } catch (err) {
         res.status(400);
@@ -63,7 +63,7 @@ router.post("/register-admin", auth.optinal, async (req, res) => {
     try {
         const user = await authService.signUpAdmin(email, password, companyData);
         res.json({
-            token: user.generateJWT()
+            token: user.generateJWT(req)
         });
     } catch (err) {
         res.status(400);
@@ -92,9 +92,17 @@ router.post("/register-employee", auth.required, authorize.isAdmin, async (req, 
 
 
 router.get("/me",auth.required, async(req,res)=>{
-    console.log(req.payload)
-    const user = await userService.find(req.payload.email)
-    res.json({user})
+    // console.log(req.payload)
+    try{
+        const user = await userService.find(req.payload.email)
+        user.generateJWT(req)
+        res.json({user})
+    }catch (err) {
+        res.status(400);
+        res.json({
+            error: err.message
+        });
+    }
 })
 
 router.post("/change-password", auth.required, async(req,res)=>{
@@ -103,7 +111,7 @@ router.post("/change-password", auth.required, async(req,res)=>{
         const {oldPass, newPass} = req.body;
         const changedPass = await authService.changePass(email, oldPass, newPass)
         res.json({
-            token: changedPass.generateJWT()
+            token: changedPass.generateJWT(req)
         });
     } catch (err) {
         res.status(400);
@@ -127,7 +135,15 @@ router.post('/forgot-password', async(req,res)=>{
 })
 
 router.post("/logout", (req, res) => {
-
+    try {
+        req.session.userToken = "",
+        res.json({success: true})
+    } catch (err) {
+        res.status(400);
+        res.json({
+            success: false
+        });
+    }
 })
 
 

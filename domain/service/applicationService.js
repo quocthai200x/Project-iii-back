@@ -10,7 +10,7 @@ const path = require("path")
 
 const ApplicationService = {
     getAllByUser: async(candidateId)=>{
-        const applicationFound = Application.find({candidateId}).populate(["jobId"]);
+        const applicationFound = Application.find({candidateId}).populate({path: "jobId", select: {status: 0}})
         if(applicationFound){
             return applicationFound
         }else{

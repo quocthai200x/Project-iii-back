@@ -26,11 +26,11 @@ var UserSchema = new Schema({
     
     activity :{
         searchHistory: [String] , // limit 10
-        companyViewed: [String],
-        companyFollowed: [String],
-        jobViewed: [String],
-        jobSaved: [String],
-        jobApplied: [String],
+        companyViewed: [ {type:  Schema.Types.ObjectId, ref: 'Company'}],
+        companyFollowed: [ {type:  Schema.Types.ObjectId, ref: 'Company'}],
+        jobViewed: [ {type:  Schema.Types.ObjectId, ref: 'Job'}],
+        jobSaved: [ {type:  Schema.Types.ObjectId, ref: 'Job'}],
+        jobApplied: [ {type:  Schema.Types.ObjectId, ref: 'Job'}],
         notification: [
             {
                 eventName: String,
@@ -102,15 +102,17 @@ UserSchema.methods.setPassword = function(password){
     this.salt = crypto.randomBytes(16).toString("hex")
     this.hash = crypto.pbkdf2Sync(password,this.salt,10000,512,"sha512").toString("hex") 
 }
-UserSchema.methods.generateJWT = function(){
+UserSchema.methods.generateJWT = function(req){
     const now = new Date();
     const expirationDate = new Date();
     expirationDate.setDate(now.getDate()+ 10)
-    return jwt.sign({
+    let jwtGenerate =  jwt.sign({
         email:this.email,
         role: this.roleNumber,
         exp : parseInt(expirationDate.getTime()/1000,10)
     },process.env.JWT_SECRET)
+    req.session.userToken = jwtGenerate;
+    return jwtGenerate;
 }
 
 UserSchema.index({roleNumber: 1})

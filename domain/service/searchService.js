@@ -7,7 +7,10 @@ var Role = require('../model/roles')
 
 
 const SearchService = {
-    searchJob: async (body,pageNumber) => {
+    searchJob: async (body,pageNumber, limit) => {
+        if(!limit){
+            limit = 50;
+        }
         let query = {};
         if(body.text){
             query.$text = {}
@@ -18,7 +21,12 @@ const SearchService = {
         let checkStatus = {'status.value': 0}
         let newQuery =  {...query,...checkDate ,...body.filter,  ...checkStatus}
         // console.log(newQuery)
-        const result = await Job.find(newQuery).sort( { score: { $meta: "textScore" } } ).limit(50).skip(50*pageNumber).select({status: 0}).populate({path: "companyId", select: {"info.name" : 1, "info.benefits": 1, "info.logo": 1}});
+        let result;
+        if(body.text){
+            result = await Job.find(newQuery).sort( { score: { $meta: "textScore" } } ).limit(limit).skip(50*pageNumber).select({status: 0}).populate({path: "companyId", select: {"info.name" : 1, "info.benefits": 1, "info.logo": 1}});
+        }else{
+            result = await Job.find(newQuery).sort({'info.outdate': 1}).limit(limit).skip(limit*pageNumber).select({status: 0}).populate({path: "companyId", select: {"info.name" : 1, "info.benefits": 1, "info.logo": 1}});
+        }
         const count = await Job.find(newQuery).count()
         //TO DO: làm thêm filter skip limit offset
         if(result){

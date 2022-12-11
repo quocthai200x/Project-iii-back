@@ -2,6 +2,15 @@ var Job = require("../model/jobs")
 var jobDictionary = require("../../config/dictionary/job")
 
 const jobService = {
+    countInField: async (field) => {
+        // console.log(field);
+        let result = await Job.countDocuments({ "info.type.field": field, "info.outdate": { $gt: new Date() }, 'status.value': 0, })
+        if (result) {
+            return result
+        } else {
+            throw new Error("cant count")
+        }
+    },
     // search: async (key) => {
     //     console.log(key)
     //     key = key.split(" ");
@@ -22,17 +31,30 @@ const jobService = {
     //     throw new Error("No items found")
     // }
     // },
-    get: async (id) => {
-        const jobFound = await Job.findById(id).select({ "_id": 0, "companyId": 0 });
-        if (jobFound && jobFound.status.name == jobDictionary.status.show.name && jobFound.status.value == jobDictionary.status.show.value) {
+    getJobByName: async (jobName, companyId) => {
+        // console.log(jobName, companyId)
+        const jobFound = await Job.findOne({ "info.name": jobName, companyId, "status.name": jobDictionary.status.show.name, "info.outdate": { $gt: new Date() } })
+            .select({ status: 0 })
+            .populate({ path: "companyId", select: { "info": 1 } })
+        if (jobFound) {
             return jobFound
+        } else {
+            throw new Error("Not existed")
+        }
+    },
+    getOtherJobsByCompany: async (jobName, companyId) => {
+        // console.log(jobName, companyId)
+        const jobFound = await Job.find({ companyId, "status.name": jobDictionary.status.show.name, "info.outdate": { $gt: new Date() } })
+            .select({ status: 0 })
+        if (jobFound) {
+            return jobFound.filter((value) => (value.info.name != jobName))
         } else {
             throw new Error("Not existed")
         }
     },
     create: async (companyId, jobInfo) => {
         // console.log(jobInfo)
-        const jobFound = await Job.findOne({companyId, "info.name": jobInfo.name })
+        const jobFound = await Job.findOne({ companyId, "info.name": jobInfo.name })
         if (jobFound) {
             throw new Error("Job in company existed");
         } else {
@@ -49,7 +71,7 @@ const jobService = {
         }
     },
     update: async (companyId, jobName, jobInfo) => {
-        const jobFound = await Job.findOne({"info.name": jobName, companyId});
+        const jobFound = await Job.findOne({ "info.name": jobName, companyId });
         if (jobFound) {
             jobFound.info = jobInfo;
             const updateJob = await jobFound.save();
@@ -64,7 +86,7 @@ const jobService = {
         }
     },
     updateStatus: async (companyId, jobName, status) => {
-        const jobFound = await Job.findOne({"info.name": jobName, companyId});
+        const jobFound = await Job.findOne({ "info.name": jobName, companyId });
         if (jobFound) {
             jobFound.status = status;
             const updateJob = await jobFound.save();
@@ -78,25 +100,41 @@ const jobService = {
 
         }
     },
-    // updateStatusAllVisible: async () => {
-    //     let show = {
-    //         name: "Đang hiển thị",
-    //         value :0
-    //     }
-    //     const jobFound = await Job.find();
-    //     jobFound.forEach((job,index) =>{
-    //         job.status = show
-    //         let res = job.save();
-    //         if(index == jobFound.length-1){
-    //             if(res){
-    //                 return res
-    //             }else{
-    //                 throw new Error("Lỗi")
-    //             }
-    //         }
-    //     })
-        
-    // }
+    updateView: async (jobName, companyId) => {
+        // console.log(jobName, companyId)
+        const jobFound = await Job.findOne({ "info.name": jobName, companyId, "status.name": jobDictionary.status.show.name })
+        if (jobFound) {
+            jobFound.viewed = jobFound.viewed + 1;
+            const update = await jobFound.save();
+            if (update) {
+                return update
+            } else {
+                throw new Error("Cant update job")
+
+            }
+
+        } else {
+            throw new Error("Not existed")
+        }
+    },
+    updateModel: async () => {
+        const jobFound = await Job.find();
+        jobFound.forEach((job, index) => {
+            if (!job.viewed) {
+                job.status = jobDictionary.status.show
+                let res = job.save();
+                if (index == jobFound.length - 1) {
+                    if (res) {
+                        return res
+                    } else {
+                        throw new Error("Lỗi")
+                    }
+                }
+            }
+
+        })
+
+    }
 }
 
 // const jobService = {

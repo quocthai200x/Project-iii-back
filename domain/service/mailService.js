@@ -20,7 +20,7 @@ const Mail = {
                 service: "gmail",
                 auth: {
                     type: "OAuth2",
-                    user: "quocthai2000xxx@gmail.com",
+                    user: "quocthai2000xx@gmail.com",
                     clientId: CLIENT_ID,
                     clientSecret: CLIENT_SECRET,
                     refreshToken: REFRESH_TOKEN,

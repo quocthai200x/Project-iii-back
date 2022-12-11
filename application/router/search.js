@@ -7,8 +7,8 @@ var authorize = require("../../config/authorize")
 
 router.post("/job" , async(req,res)=>{
     try {
-        const {pageNumber} = req.query
-        const result = await searchService.searchJob(req.body, pageNumber);
+        const {pageNumber, limit} = req.query
+        const result = await searchService.searchJob(req.body, pageNumber, limit);
         res.json(result);
     } catch (err) {
         res.status(400);

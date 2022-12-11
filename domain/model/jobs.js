@@ -49,21 +49,22 @@ var JobSchema = new Schema({
     info: jobInfoSchema,
     // createBy: {type:  Schema.Types.ObjectId, ref: 'User'},
     status: { type: NameValueSchema, default: jobDictionary.status.draft },
-   
+    viewed: {type: Number, default: 0}
 
 }, { timestamps: true }
 )
 
 SalarySchema.index({from: 1})
 SalarySchema.index({to: 1})
-JobSchema.index({"info.keyword": "text", "info.name": "text"})
+JobSchema.index({"info.keyword": "text", "info.name": "text", "info.type.field" : "text"})
 // JobSchema.index({})
 JobSchema.index({"info.level.name": 1})
 
 JobSchema.index({companyId: 1, "info.name": -1});
 JobSchema.index({"info.workingAddress.province": 1})
 JobSchema.index({"info.type.name": 1})
-
+JobSchema.index({"info.outdate": 1})
+JobSchema.index({viewed: 1})
 
 
 

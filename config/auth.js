@@ -1,12 +1,17 @@
 const { expressjwt: jwt } = require("express-jwt")
 
 const getToken =(req)=> {
-    const {headers:{authorization}} = req;
-    if(authorization && authorization.split(" ")[0] == "Bearer"){
-        return authorization.split(" ")[1];
-    }else{
+    // const {headers:{authorization}} = req;
+    // if(authorization && authorization.split(" ")[0] == "Bearer"){
+    //     return authorization.split(" ")[1];
+    // }else{
+    //     return null;
+    // }
+    if (!(req.session && req.session.userToken)) {
         return null;
     }
+    // console.log(req.session.userToken)
+    return req.session.userToken
 
 }
 const auth ={

@@ -40,10 +40,27 @@ router.put('/', auth.required,authorize.canWriteRecruitment ,async  (req, res) =
     }
 })
 
-router.get("/", auth.optinal, async(req, res)=>{
+
+router.get("/others/:jobName_idCompany", auth.optinal, async(req, res)=>{
     try {
-        const {id} = req.query;
-        const jobFound = await jobService.get(id)
+        const {jobName_idCompany} = req.params;
+        let arr = jobName_idCompany.split('---');
+        const jobFound = await jobService.getOtherJobsByCompany(arr[0], arr[1])
+        res.json(jobFound)
+    } catch (err) {
+        res.status(400);
+        res.json({
+            code: err.message
+        })
+    }
+})
+
+
+router.get("/:jobName_idCompany", auth.optinal, async(req, res)=>{
+    try {
+        const {jobName_idCompany} = req.params;
+        let arr = jobName_idCompany.split('---');
+        const jobFound = await jobService.getJobByName(arr[0], arr[1])
         res.json(jobFound)
     } catch (err) {
         res.status(400);
@@ -68,10 +85,37 @@ router.put('/update-status', auth.required,authorize.canWriteRecruitment ,async 
     }
 })
 
+router.put('/update-view/:jobName_idCompany', auth.required, authorize.isUser, async(req,res)=>{
+    try {
+        const {jobName_idCompany} = req.params;
+        let arr = jobName_idCompany.split('---');
+        const updated = await jobService.updateView(arr[0], arr[1])
+        res.json(updated)
+    } catch (err) {
+        res.status(400);
+        res.json({
+            code: err.message
+        })
+    }
+})
 
-// router.put('/update-status-all', async  (req, res) => {
+router.get("/count-in-field/:field" , async(req,res)=>{
+    // console.log("ab");
+    try {
+        const {field} = req.params
+        const result = await jobService.countInField(field);
+        res.json(result);
+    } catch (err) {
+        res.status(400);
+        res.json({
+            code: err.message
+        })
+    }
+})
+
+// router.put('/update-model-all', async  (req, res) => {
 //     try {
-//         const updatedJob = await jobService.updateStatusAllVisible();
+//         const updatedJob = await jobService.updateModel();
 //         res.json(updatedJob);
 //     } catch (err) {
 //         res.status(400);
@@ -80,6 +124,7 @@ router.put('/update-status', auth.required,authorize.canWriteRecruitment ,async 
 //         })
 //     }
 // })
+
 
 // router.get("/",auth.required ,async (req, res) => {
 //     const result = await postService.getPost()

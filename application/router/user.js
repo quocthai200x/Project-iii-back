@@ -34,7 +34,7 @@ router.post("/attach-role", auth.required, authorize.canWriteUserPermission, asy
 })
 
 
-router.get('/get-all-company-email', async (req, res) =>{
+router.get('/get-all-company-email', async (req, res) => {
     try {
         const allEmail = await userService.getAllEmailCompany();
         res.json(allEmail)
@@ -46,6 +46,22 @@ router.get('/get-all-company-email', async (req, res) =>{
     }
 })
 
+router.post("/:id/like", auth.required, authorize.isUser, async (req, res) => {
+    const { email } = req.payload;
+    const arr = req.params.id.split('---');
+    try {
+        const like = await userService.likeJob(email, arr[0], arr[1])
+        res.json({
+            like
+        });
+    } catch (err) {
+        res.status(400);
+        res.json({
+            error: err.message
+        });
+    }
+
+});
 
 // router.post("/:following/follow", async (req, res) => {
 //     const { follower } = req.body;

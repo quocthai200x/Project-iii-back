@@ -1,30 +1,61 @@
 // const Company = require("../model/companies");
-var Users  = require("../model/users")
+var Users = require("../model/users")
+var Jobs = require("../model/jobs")
 
 
 const userService = {
-    getAllEmailCompany: async() =>{
-        return Users.find({roleNumber: 1}).select({email: 1})
+    getAllEmailCompany: async () => {
+        return Users.find({ roleNumber: 1 }).select({ email: 1 })
     },
     find: async (email) => {
-        return  Users.findOne({email});
+        let user = await Users.findOne({ email }).select({ hash: 0, salt: 0 });
+        if(user){
+            return user
+        }
+        else{
+            throw new Error("Cant find user")
+        } 
     },
 
-    update: async (email, data) =>{
-        const user = await Users.findOne({email});
-        if(user.roleNumber == 0){
+    update: async (email, data) => {
+        const user = await Users.findOne({ email });
+        if (user.roleNumber == 0) {
             user.info = data;
             const updatedUser = await user.save()
-            if(updatedUser){
-               return updatedUser.info
+            if (updatedUser) {
+                return updatedUser.info
             }
-            else{
+            else {
                 throw new Error("Error: update fail")
             }
-        }else{
+        } else {
             throw new Error("Error: update fail")
         }
 
-    }
+    },
+    likeJob: async (email, jobName, companyId ) => {
+        const user = await Users.findOne({email}).select("activity.jobSaved");
+        // old doc without "like" field
+        const job = await Jobs.findOne({"info.name": jobName, companyId})
+        if(!user || !job){
+            throw new Error("Not found");
+        }else{
+            if (!user.activity.jobSaved) {
+                user.activity.jobSaved = [];
+            }
+    
+            if (user.activity.jobSaved.find(item => job._id.equals(item))) {
+                //user had liked && and now delete 
+                // console.log(user.activity.jobSaved.find(item => job._id.equals(item)))
+                user.activity.jobSaved = user.activity.jobSaved.filter(item => !job._id.equals(item))
+            } else {
+                // user not like && now like
+                user.activity.jobSaved.push(job._id);
+            }
+            await user.save();
+            return user.toObject().activity.jobSaved;
+        }
+
+    },
 }
 module.exports = userService;
