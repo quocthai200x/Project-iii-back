@@ -53,6 +53,7 @@ var UserSchema = new Schema({
         salaryTarget: {type: Number, default: 0},
         address: {type: String, default: ""},
         country: {type: String, default: ""},
+        ward: {type: String, default: ""},
         district: {type: String, default: ""},
         city: {type: String, default: ""},
         CV: {type: String, default: ""},

@@ -17,7 +17,9 @@ const SearchService = {
             query.$text.$search = body.text;
            
         }
-        let checkDate = { "info.outdate": { $gt: new Date() }}
+        let newDate = new Date()
+        newDate.setDate(newDate.getDate() + 3);
+        let checkDate = { "info.outdate": { $gt: newDate }}
         let checkStatus = {'status.value': 0}
         let newQuery =  {...query,...checkDate ,...body.filter,  ...checkStatus}
         // console.log(newQuery)

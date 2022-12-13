@@ -4,17 +4,34 @@ var Jobs = require("../model/jobs")
 
 
 const userService = {
+    updateModel: async () => {
+        const userFound = await Users.find();
+        userFound.forEach((user, index) => {
+            if (!user.info.ward) {
+                user.info.ward = ""
+                let res = user.save();
+                if (index == userFound.length - 1) {
+                    if (res) {
+                        return res
+                    } else {
+                        throw new Error("Lỗi")
+                    }
+                }
+            }
+
+        })
+    },
     getAllEmailCompany: async () => {
         return Users.find({ roleNumber: 1 }).select({ email: 1 })
     },
     find: async (email) => {
         let user = await Users.findOne({ email }).select({ hash: 0, salt: 0 });
-        if(user){
+        if (user) {
             return user
         }
-        else{
+        else {
             throw new Error("Cant find user")
-        } 
+        }
     },
 
     update: async (email, data) => {
@@ -33,17 +50,17 @@ const userService = {
         }
 
     },
-    likeJob: async (email, jobName, companyId ) => {
-        const user = await Users.findOne({email}).select("activity.jobSaved");
+    likeJob: async (email, jobName, companyId) => {
+        const user = await Users.findOne({ email }).select("activity.jobSaved");
         // old doc without "like" field
-        const job = await Jobs.findOne({"info.name": jobName, companyId})
-        if(!user || !job){
+        const job = await Jobs.findOne({ "info.name": jobName, companyId })
+        if (!user || !job) {
             throw new Error("Not found");
-        }else{
+        } else {
             if (!user.activity.jobSaved) {
                 user.activity.jobSaved = [];
             }
-    
+
             if (user.activity.jobSaved.find(item => job._id.equals(item))) {
                 //user had liked && and now delete 
                 // console.log(user.activity.jobSaved.find(item => job._id.equals(item)))

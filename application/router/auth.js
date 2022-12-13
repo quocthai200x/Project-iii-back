@@ -136,7 +136,9 @@ router.post('/forgot-password', async(req,res)=>{
 
 router.post("/logout", (req, res) => {
     try {
-        req.session.userToken = "",
+        if (req.session) {
+            req.session.reset();
+          }
         res.json({success: true})
     } catch (err) {
         res.status(400);

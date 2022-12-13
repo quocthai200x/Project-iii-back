@@ -63,6 +63,18 @@ router.post("/:id/like", auth.required, authorize.isUser, async (req, res) => {
 
 });
 
+// router.put('/update-model-all', async  (req, res) => {
+//     try {
+//         const updatedJob = await userService.updateModel();
+//         res.json(updatedJob);
+//     } catch (err) {
+//         res.status(400);
+//         res.json({
+//             code: err.message
+//         })
+//     }
+// })
+
 // router.post("/:following/follow", async (req, res) => {
 //     const { follower } = req.body;
 //     const { following } = req.params
