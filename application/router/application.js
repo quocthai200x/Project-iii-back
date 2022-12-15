@@ -4,6 +4,20 @@ var router = express.Router()
 var auth = require("../../config/auth")
 const authorize = require("../../config/authorize")
 
+router.get("/by-user-with-job", auth.required, authorize.isUser, async(req,res) =>{
+    const {userId} = req;
+    const {jobId} = req.query
+    try {
+        const result = await applicationService.findWithCandidateAndJobID(userId, jobId)
+        res.json(result);
+    } catch (err) {
+        res.status(400);
+        res.json({
+            error: err.message
+        });
+    }
+    
+})
 router.get("/by-user", auth.required, authorize.isUser, async(req,res) =>{
     const {userId} = req;
     try {
@@ -79,6 +93,22 @@ router.put('/approve-by-user', auth.required, authorize.isUser, async(req, res)=
     }
 })
 
+
+router.put('/reject-by-user', auth.required, authorize.isUser, async(req, res)=>{
+    const {userId} = req
+    const {applicationId} = req.body;
+    try {
+        const rejectApplication = await applicationService.rejectByUser(userId, applicationId);
+        res.json(rejectApplication)
+    } catch (err) {
+        res.status(400);
+        res.json({
+            error: err.message
+        });
+    }
+})
+
+
 router.put('/approve-by-company', auth.required, authorize.canWriteApplier, async(req, res)=>{
     const {companyId} = req;
     const {applicationId} = req.body
@@ -92,6 +122,20 @@ router.put('/approve-by-company', auth.required, authorize.canWriteApplier, asyn
         });
     }
 })
+router.put('/reject-by-company', auth.required, authorize.canWriteApplier, async(req, res)=>{
+    const {companyId} = req;
+    const {applicationId} = req.body
+    try {
+        const rejectApplication = await applicationService.rejectByCompany(companyId, applicationId);
+        res.json(rejectApplication)
+    } catch (err) {
+        res.status(400);
+        res.json({
+            error: err.message
+        });
+    }
+})
+
 
 
 router.put("/change-status", auth.required, authorize.canWriteApplier, async(req,res)=>{
