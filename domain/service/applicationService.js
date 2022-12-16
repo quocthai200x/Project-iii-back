@@ -11,7 +11,7 @@ const path = require("path")
 const ApplicationService = {
     getAllByUser: async (candidateId) => {
         const applicationFound = Application.find({ candidateId }).sort({ updatedAt: -1 })
-            .populate({ path: "jobId", select: { "info.name": 1, "info.salaryRate": 1, "info.workingAddress": 1 }, })
+            .populate({ path: "jobId", select: { "info.name": 1, "info.salaryRate": 1, "info.workingAddress": 1 ,"info.recruitmentProcess": 1}, })
             .populate({ path: "companyId", select: { "info.logo": 1, "info.name": 1 } })
         if (applicationFound) {
             return applicationFound
@@ -19,7 +19,7 @@ const ApplicationService = {
             throw new Error("Not found")
         }
     },
-    
+
     getAllByCompany: async (companyId) => {
         const applicationFound = Application.find({ companyId }).sort('jobId').populate({ path: "candidateId", select: "info" })
         if (applicationFound) {
@@ -28,7 +28,7 @@ const ApplicationService = {
             throw new Error("Not found")
         }
     },
-    findWithCandidateAndJobID: async (candidateId, jobId)=>{
+    findWithCandidateAndJobID: async (candidateId, jobId) => {
         const applicationFound = Application.findOne({ candidateId, jobId })
         if (applicationFound) {
             return applicationFound
@@ -40,6 +40,7 @@ const ApplicationService = {
     invite: async (jobName, candidateEmail, companyId) => {
         const JobFound = await Job.findOne({ companyId, "info.name": jobName });
         const UserFound = await User.findOne({ email: candidateEmail, roleNumber: 0 });
+        // console.log(JobFound)
         if (UserFound && JobFound && JobFound.status.value == 0) {
             const candidateApplierFound = await Application.findOne({ jobId: JobFound._id, candidateId: UserFound._id })
             if (!candidateApplierFound) {
@@ -85,11 +86,30 @@ const ApplicationService = {
     },
     approveByCompany: async (companyId, applicationId) => {
         const applicationFound = await Application.findById(applicationId);
-        if (applicationFound && !applicationFound.isApproved
+        if (applicationFound && applicationFound.status.value == applicationDictionary.status.turnIn.value
             && applicationFound.companyId.toString() == companyId
             && applicationDictionary.created.isUser(applicationFound.createdBy)
         ) {
-            applicationFound.isApproved = true;
+            applicationFound.status = applicationDictionary.status.approve;
+            const result = await applicationFound.save();
+            if (result) {
+                return result;
+            } else {
+                throw new Error("Cant approve")
+            }
+        } else {
+            throw new Error("Not found")
+        }
+    },
+
+    approveByUser: async (userId, applicationId) => {
+        const applicationFound = await Application.findById(applicationId);
+        if (applicationFound
+            && applicationFound.status.value == applicationDictionary.status.turnIn.value
+            && applicationDictionary.created.isCompany(applicationFound.createdBy)
+            && applicationFound.candidateId.toString() == userId
+        ) {
+            applicationFound.status = applicationDictionary.status.approve;
             const result = await applicationFound.save();
             if (result) {
                 return result;
@@ -102,13 +122,11 @@ const ApplicationService = {
     },
     rejectByCompany: async (companyId, applicationId) => {
         const applicationFound = await Application.findById(applicationId);
-        if (applicationFound && !applicationFound.isApproved
+        if (applicationFound
             && applicationFound.companyId.toString() == companyId
             && applicationDictionary.created.isUser(applicationFound.createdBy)
         ) {
-            applicationFound.isApproved = true;
-            applicationFound.isClose = true;
-            applicationFound.status = applicationDictionary.status[5]
+            applicationFound.status = applicationDictionary.status.notQualify
             const result = await applicationFound.save();
             if (result) {
                 return result;
@@ -119,34 +137,16 @@ const ApplicationService = {
             throw new Error("Not found")
         }
     },
-    approveByUser: async (userId, applicationId) => {
-        const applicationFound = await Application.findById(applicationId);
-        if (!applicationFound.isApproved
-            && applicationFound
-            && applicationDictionary.created.isCompany(applicationFound.createdBy)
-            && applicationFound.candidateId.toString() == userId
-        ) {
-            applicationFound.isApproved = true;
-            const result = await applicationFound.save();
-            if (result) {
-                return result;
-            } else {
-                throw new Error("Cant approve")
-            }
-        } else {
-            throw new Error("Not found")
-        }
-    },
+
+
+    
     rejectByUser: async (userId, applicationId) => {
         const applicationFound = await Application.findById(applicationId);
-        if (!applicationFound.isApproved
-            && applicationFound
+        if (applicationFound
             && applicationDictionary.created.isCompany(applicationFound.createdBy)
             && applicationFound.candidateId.toString() == userId
         ) {
-            applicationFound.isApproved = true;
-            applicationFound.isClose = true;
-            applicationFound.status = applicationDictionary.status[6]
+            applicationFound.status = applicationDictionary.status.rejectByUser
 
             const result = await applicationFound.save();
             if (result) {
@@ -158,37 +158,74 @@ const ApplicationService = {
             throw new Error("Not found")
         }
     },
-    updateStatus: async (companyId, _id, status) => {
-        const applicationFound = await Application.findOne({ _id, companyId, isClose: false, isApproved: true })
-        if (applicationFound) {
-            applicationFound.status = status;
+    acceptToWork: async (userId, applicationId) => {
+        const applicationFound = await Application.findById(applicationId);
+        if (applicationFound
+            && applicationFound.status.value == applicationDictionary.status.offer.value
+            && applicationFound.candidateId.toString() == userId
+        ) {
+            applicationFound.status = applicationDictionary.status.getHired;
             const result = await applicationFound.save();
             if (result) {
                 return result;
             } else {
-                throw new Error("cant update status")
+                throw new Error("Cant approve")
             }
         } else {
             throw new Error("Not found")
         }
     },
-    closeApplication: async (companyId, _id) => {
-        const applicationFound = await Application.findOne({ _id, companyId, isClose: false, isApproved: true })
-        if (applicationFound) {
-            applicationFound.isClose = true;
+
+    updateStatusByCompany: async (companyId, applicationId, type, statusIndex) => {
+        const applicationFound = await Application.findById(applicationId).populate({ path: "jobId", select: "info.recruitmentProcess" })
+        if (applicationFound
+            && applicationFound.companyId.toString() == companyId
+            &&(applicationFound.status.value < applicationDictionary.status.rejectByUser.value
+                || applicationFound.status.value < applicationDictionary.status.notQualify.value
+                || applicationFound.status.value < applicationDictionary.status.getHired.value)
+                
+        ) {
+            let interviewStatus = null;
+            console.log(applicationFound.jobId.info.recruitmentProcess)
+            if (type == 'set-interview' && applicationFound.status.value == applicationDictionary.status.approve.value) {
+                interviewStatus = applicationDictionary.status.interview
+                if (applicationFound.jobId.info.recruitmentProcess.length > 0) {
+                    interviewStatus.note = applicationFound.jobId.info.recruitmentProcess[0]
+                }
+            }
+            if (type == 'continue-interview'
+                && applicationFound.status.value == applicationDictionary.status.interview.value
+                && applicationFound.jobId.info.recruitmentProcess.length > 0
+            ) {
+                interviewStatus = applicationDictionary.status.interview
+                if (statusIndex >= applicationFound.jobId.info.recruitmentProcess.length) {
+                    statusIndex = applicationFound.jobId.info.recruitmentProcess.length - 1
+                }
+                interviewStatus.note = applicationFound.jobId.info.recruitmentProcess[statusIndex]
+            }
+            if (type == 'offer' && applicationFound.status.value == applicationDictionary.status.interview.value) {
+                interviewStatus = applicationDictionary.status.offer
+            }
+            if(!interviewStatus){
+                throw new Error("Something wrong with type")
+            }
+            applicationFound.status = interviewStatus;
             const result = await applicationFound.save();
             if (result) {
                 return result;
             } else {
-                throw new Error("cant close application")
+                throw new Error("Cant update status")
             }
         } else {
-            throw new Error("Not found ")
+            throw new Error("Not found")
         }
     },
+
+
+
     commentCompany: async (_id, candidateId, comment) => {
-        const applicationFound = await Application.findOne({ _id, candidateId, isClose: true });
-        if (applicationFound && !applicationFound.candidateComment) {
+        const applicationFound = await Application.findOne({ _id, candidateId });
+        if (applicationFound && !applicationFound.candidateComment && applicationFound.status.value >= applicationDictionary.status.getHired.value) {
             applicationFound.candidateComment = comment;
             const result = await applicationFound.save();
             if (result) {
@@ -201,8 +238,8 @@ const ApplicationService = {
         }
     },
     commentUser: async (_id, companyId, comment) => {
-        const applicationFound = await Application.findOne({ _id, companyId, isClose: true });
-        if (applicationFound && !applicationFound.companyComment) {
+        const applicationFound = await Application.findOne({ _id, companyId });
+        if (applicationFound && !applicationFound.companyComment && applicationFound.status.value >= applicationDictionary.status.getHired.value) {
             applicationFound.companyComment = comment;
             const result = await applicationFound.save();
             if (result) {

@@ -137,12 +137,25 @@ router.put('/reject-by-company', auth.required, authorize.canWriteApplier, async
 })
 
 
+router.put('/accept-to-work', auth.required, authorize.isUser, async(req, res)=>{
+    const {userId} = req
+    const {id} = req.body;
+    try {
+        const rejectApplication = await applicationService.acceptToWork(userId, id);
+        res.json(rejectApplication)
+    } catch (err) {
+        res.status(400);
+        res.json({
+            error: err.message
+        });
+    }
+})
 
 router.put("/change-status", auth.required, authorize.canWriteApplier, async(req,res)=>{
     const {companyId} = req;
-    const {id, status} = req.body;
+    const {id, interviewIndex, type} = req.body;
     try {
-        const result = await applicationService.updateStatus(companyId, id, status)
+        const result = await applicationService.updateStatusByCompany(companyId, id, type, interviewIndex)
         res.json(result);
     } catch (err) {
         res.status(400);
@@ -153,19 +166,11 @@ router.put("/change-status", auth.required, authorize.canWriteApplier, async(req
 })
 
 
-router.post("/close-application", auth.required, authorize.canWriteApplier, async(req,res)=>{
-    const {companyId} = req;
-    const {id} = req.body;
-    try {
-        const result = await applicationService.closeApplication(companyId, id)
-        res.json(result);
-    } catch (err) {
-        res.status(400);
-        res.json({
-            error: err.message
-        });
-    }
-})
+
+
+
+
+
 
 
 router.post("/user-comment", auth.required, authorize.isUser, async(req,res)=>{

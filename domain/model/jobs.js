@@ -43,6 +43,9 @@ let jobInfoSchema = new Schema({
     languageRecruitment: [String],
     emailReceive: [String],
     outdate: Date,
+    recruitmentProcess: [{
+        name: String, value: Number
+    }]
 })
 var JobSchema = new Schema({
     companyId: { type: Schema.Types.ObjectId, ref: 'Company' },

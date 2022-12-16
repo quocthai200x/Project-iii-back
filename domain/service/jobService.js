@@ -73,6 +73,7 @@ const jobService = {
     update: async (companyId, jobName, jobInfo) => {
         const jobFound = await Job.findOne({ "info.name": jobName, companyId });
         if (jobFound) {
+            jobInfo.recruitmentProcess = jobFound.info.recruitmentProcess;
             jobFound.info = jobInfo;
             const updateJob = await jobFound.save();
             if (updateJob) {
@@ -120,17 +121,25 @@ const jobService = {
     updateModel: async () => {
         const jobFound = await Job.find();
         jobFound.forEach((job, index) => {
-            if (!job.viewed) {
-                job.status = jobDictionary.status.show
-                let res = job.save();
-                if (index == jobFound.length - 1) {
-                    if (res) {
-                        return res
-                    } else {
-                        throw new Error("Lỗi")
-                    }
+            let newJobInfo = job.info
+            newJobInfo.recruitmentProcess = [
+                {
+                    name: "Vòng phỏng vấn HR", value: 0
+                },
+                {
+                    name: "Vòng phỏng vấn CTO", value: 1
+                }
+            ]
+            job.info = newJobInfo
+            let res = job.save();
+            if (index == jobFound.length - 1) {
+                if (res) {
+                    return res
+                } else {
+                    throw new Error("Lỗi")
                 }
             }
+
 
         })
     }
