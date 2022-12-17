@@ -39,7 +39,7 @@ app.use(morgan("dev"))
 require("./config/passport")
 app.use(router)
 app.get('/', function (req, res, next) {
-    res.send('<h1>Đã kết nối</h1>')
+    res.send('<h1>Đã kết nố</h1>')
 })
 
 // app.use(express.static("static"));
