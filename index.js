@@ -20,7 +20,8 @@ app.use(sessions({
     cookie: {
         httpOnly: true,
         ephemeral: false,
-        secure: false,
+        secure: process.env.NODE_ENV=== 'development'?true:false,
+        sameSite: "none",
         domain: process.env.NODE_ENV === 'development'?"https://project-iii-front.netlify.app":"http://localhost:5173"
     }
 }));
