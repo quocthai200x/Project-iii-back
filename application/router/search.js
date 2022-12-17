@@ -17,6 +17,19 @@ router.post("/job" , async(req,res)=>{
         })
     }
 })
+router.post("/company" , async(req,res)=>{
+    try {
+        const {pageNumber, limit, } = req.query
+        const {keyword} = req.body
+        const result = await searchService.searchCompany(keyword, pageNumber, limit);
+        res.json(result);
+    } catch (err) {
+        res.status(400);
+        res.json({
+            code: err.message
+        })
+    }
+})
 
 router.post("/candidate", auth.required, authorize.canSearchCandidate,  async(req,res)=>{
     try {
