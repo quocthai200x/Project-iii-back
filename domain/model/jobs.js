@@ -31,6 +31,15 @@ let typeSchema = new Schema({
     name: String,
 })
 
+
+let benefitSchema = new Schema({
+    svg: String,
+    desc: String,
+    label: String,
+})
+
+
+
 let jobInfoSchema = new Schema({
     name: String,
     level: NameValueSchema,
@@ -42,6 +51,7 @@ let jobInfoSchema = new Schema({
     keyword: [String],
     languageRecruitment: [String],
     emailReceive: [String],
+    benefits: [benefitSchema],
     outdate: Date,
     recruitmentProcess: [{
         name: String, value: Number

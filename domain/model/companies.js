@@ -16,6 +16,11 @@ let workingAddress = new Schema({
     isHeadquarter: {type: Boolean, default: false}
 })
 
+let benefitSchema = new Schema({
+    svg: String,
+    desc: String,
+    label: String,
+})
 
 let companyInfoSchema = new Schema( {
     name: { type: String, default: "" },
@@ -23,8 +28,10 @@ let companyInfoSchema = new Schema( {
     location: [workingAddress],
     size: { type: Number, default: 0 },
     workingArea: [TypeSchema],
-    benefits: [String],
+    benefits: [benefitSchema],
     desc: { type: String, default: "" },
+    bannerImage: {type: String, default :""},
+    aboutLink: {type: String, default:""},
     logo: { type: String, default: "" },
     video: { type: String, default: "" },
     imageIntro: [String],
@@ -42,6 +49,7 @@ var CompanySchema = new Schema({
 )
 
 companyInfoSchema.index({name: "text"})
+companyInfoSchema.index({name: 1})
 
 var Company = mongoose.model("Company", CompanySchema)
 module.exports = Company;

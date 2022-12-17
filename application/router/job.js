@@ -7,8 +7,33 @@ var searchService = require("../../domain/service/searchService")
 
 
 //  create new post
+router.get('/user-favorite', auth.required, authorize.isUser, async(req,res)=>{
+    try {
+
+        const { email } = req.payload;
+        const jobFound = await jobService.getUserFavoriteJob(email)
+        res.json(jobFound)
+    } catch (err) {
+        res.status(400);
+        res.json({
+            code: err.message
+        })
+    }
+})
 
 
+router.get('/by-company-name/:companyName', async(req,res)=>{
+    try {
+        const {companyName} = req.params;
+        const jobFound = await jobService.getJobByCompanyName(companyName)
+        res.json(jobFound)
+    } catch (err) {
+        res.status(400);
+        res.json({
+            code: err.message
+        })
+    }
+})
 
 router.post('/', auth.required,authorize.canWriteRecruitment ,async  (req, res) => {
     try {

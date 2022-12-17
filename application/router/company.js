@@ -9,16 +9,13 @@ var companyService = require("../../domain/service/companyService")
 var auth = require("../../config/auth")
 var authorize = require('../../config/authorize')
 
-
-router.put("/", auth.required, authorize.canWriteCompanyInfo, async (req, res) => {
-    const companyId = req.companyId;
-    const data = req.body
-    
+router.get('/:name', async(req,res)=>{
+    const companyName = req.params.name
     try {
-        const result = await companyService.update(data,  companyId)
-        res.json({
-            result,
-        });
+        const result = await companyService.get(companyName)
+        res.json(
+            result
+        );
     } catch (err) {
         res.status(400);
         res.json({
@@ -27,6 +24,34 @@ router.put("/", auth.required, authorize.canWriteCompanyInfo, async (req, res) =
     }
 })
 
+
+router.put("/", auth.required, authorize.canWriteCompanyInfo, async (req, res) => {
+    const companyId = req.companyId;
+    const data = req.body
+    
+    try {
+        const result = await companyService.update(data,  companyId)
+        res.json(result);
+    } catch (err) {
+        res.status(400);
+        res.json({
+            email: err.message
+        });
+    }
+})
+
+
+// router.put('/update-model-all', async  (req, res) => {
+//     try {
+//         const updatedJob = await companyService.updateModel();
+//         res.json(updatedJob);
+//     } catch (err) {
+//         res.status(400);
+//         res.json({
+//             code: err.message
+//         })
+//     }
+// })
 
 
 module.exports = router;
