@@ -21,7 +21,7 @@ app.use(sessions({
         httpOnly: true,
         ephemeral: false,
         secure: false,
-        domain: process.env.NODE_ENV === 'development'?"https://project-iii-front.vercel.app":"http://localhost:5173"
+        domain: process.env.NODE_ENV === 'development'?"https://project-iii-front.netlify.app":"http://localhost:5173"
     }
 }));
 
