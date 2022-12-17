@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "start": "nodemon --inspect index.js",
-    "build": "webpack"
+    "build": "webpack --config webpack.dist.config.js"
   },
   "dependencies": {
     "@elastic/elasticsearch": "^8.5.0",
