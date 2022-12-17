@@ -10,7 +10,7 @@ var morgan = require("morgan")
 var router = require("./application/router")
 var path = require("path")
 const port = process.env.port || 6969;
-
+let listDomain = ["http://localhost:5173", "https://project-iii-front.vercel.app", "https://project-iii-front.netlify.app"];
 app.use(sessions({
     cookieName: "session",
     proxy: true,
@@ -20,7 +20,8 @@ app.use(sessions({
     cookie: {
         httpOnly: true,
         ephemeral: false,
-        secure: false
+        secure: false,
+        domain: process.env.NODE_ENV === 'development'?"https://project-iii-front.vercel.app":"http://localhost:5173"
     }
 }));
 
@@ -28,7 +29,7 @@ app.use(sessions({
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(cors({
-    origin: ["http://localhost:5173", "https://project-iii-front.vercel.app", "https://project-iii-front.netlify.app"],
+    origin: listDomain,
     credentials: true
 }
 ))
