@@ -14,7 +14,7 @@ const port = process.env.port || 6969;
 
 app.use(sessions({
     cookieName: "session",
-    proxy: true,
+    secureProxy: true,
     secret: process.env.SESSION_SECRET,
     duration: process.env.MY_IMPOSSIIBLE_SECRET,
     activeDuration: parseInt((new Date()).getTime() / 1000, 10),
