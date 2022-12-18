@@ -19,24 +19,33 @@ app.use(cors({
     credentials: true
 }
 ))
-if(!(process.env.NODE_ENV.trim() === 'development')){
-   
+if (!(process.env.NODE_ENV.trim() === 'development')) {
     app.set('trust proxy', true)
 }
 
 app.use(sessions({
     cookieName: "session",
-   
     secret: process.env.SESSION_SECRET,
     duration: process.env.MY_IMPOSSIIBLE_SECRET,
     activeDuration: parseInt((new Date()).getTime() / 1000, 10),
     cookie: {
         httpOnly: true,
         ephemeral: false,
-        secure: process.env.NODE_ENV.trim() === 'development' ? false : true,
-        sameSite:process.env.NODE_ENV.trim() === 'development'?true : "none",
+        secureProxy: process.env.NODE_ENV.trim() === 'development' ? false : true,
+        sameSite: process.env.NODE_ENV.trim() === 'development' ? true : "none",
     }
 }));
+
+app.use(function(req, res, next) {
+    if (req.session.seenyou) {
+      res.setHeader('X-Seen-You', 'true');
+    } else {
+      // setting a property will automatically cause a Set-Cookie response
+      // to be sent
+      req.session.seenyou = true;
+      res.setHeader('X-Seen-You', 'false');
+    }
+  });
 
 // app.use((req, res, next)=>{
 //     if(!(process.env.NODE_ENV.trim() === 'development')){
