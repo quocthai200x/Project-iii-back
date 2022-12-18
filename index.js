@@ -31,7 +31,7 @@ app.use(sessions({
     cookie: {
         httpOnly: true,
         ephemeral: false,
-        domain: "project-iii-front.vercel.app",
+        domain: process.env.NODE_ENV.trim() === 'development' ? "localhost":"project-iii-front.vercel.app",
         secureProxy: process.env.NODE_ENV.trim() === 'development' ? false : true,
         sameSite: process.env.NODE_ENV.trim() === 'development' ? true : "none",
     }
@@ -46,6 +46,8 @@ app.use(function(req, res, next) {
       req.session.seenyou = true;
       res.setHeader('X-Seen-You', 'false');
     }
+    // console.log(res.header('X-Seen-You'))
+    next()
   });
 
 // app.use((req, res, next)=>{
