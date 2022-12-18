@@ -31,6 +31,7 @@ app.use(sessions({
 app.use((req, res, next)=>{
     if(process.env.NODE_ENV === 'development'){
         req["session"].secure = true;
+        req['session'].secureProxy = true
     }
     next();
 });
