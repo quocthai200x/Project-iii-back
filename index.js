@@ -21,9 +21,8 @@ app.use(sessions({
     cookie: {
         httpOnly: false,
         ephemeral: false,
-        secure: false,
-        sameSite: "lax",
-        domain: process.env.NODE_ENV === 'development'?"http://localhost:5173":"https://project-iii-front.vercel.app"
+        secure: process.env.NODE_ENV === 'development'? false : true,
+        sameSite: process.env.NODE_ENV === 'development'?true : "none",
     }
 }));
 
