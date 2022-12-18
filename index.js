@@ -19,7 +19,7 @@ app.use(sessions({
     duration: process.env.MY_IMPOSSIIBLE_SECRET,
     activeDuration: parseInt((new Date()).getTime() / 1000, 10),
     cookie: {
-        httpOnly: true,
+        httpOnly: false,
         ephemeral: false,
         secure: false,
         sameSite: "strict",
