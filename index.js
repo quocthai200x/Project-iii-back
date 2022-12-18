@@ -10,7 +10,7 @@ var morgan = require("morgan")
 var router = require("./application/router")
 var path = require("path")
 const port = process.env.port || 6969;
-app.set('trust proxy', true)
+// app.set('trust proxy', true)
 
 app.use(sessions({
     cookieName: "session",
@@ -21,7 +21,7 @@ app.use(sessions({
     cookie: {
         httpOnly: true,
         ephemeral: false,
-        secure: process.env.NODE_ENV=== 'development'?false:true,
+        secure: false,
         sameSite: "none",
         domain: process.env.NODE_ENV === 'development'?"http://localhost:5173":"https://project-iii-front.netlify.app"
     }
