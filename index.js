@@ -11,11 +11,18 @@ var router = require("./application/router")
 var path = require("path")
 const port = process.env.port || 6969;
 
+
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({ extended: true }))
+app.use(cors({
+    origin: ["http://localhost:5173", "https://project-iii-front.vercel.app", "https://project-iii-front.netlify.app"],
+    credentials: true
+}
+))
 if(!(process.env.NODE_ENV.trim() === 'development')){
    
     app.set('trust proxy', true)
 }
-
 
 app.use(sessions({
     cookieName: "session",
@@ -41,13 +48,6 @@ app.use(sessions({
 //     next();
 // });
 
-app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({ extended: true }))
-app.use(cors({
-    origin: ["http://localhost:5173", "https://project-iii-front.vercel.app", "https://project-iii-front.netlify.app"],
-    credentials: true
-}
-))
 
 app.use(morgan("dev"))
 require("./config/passport")
