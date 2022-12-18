@@ -10,7 +10,7 @@ var morgan = require("morgan")
 var router = require("./application/router")
 var path = require("path")
 const port = process.env.port || 6969;
-// app.set('trust proxy', true)
+app.set('trust proxy', true)
 
 app.use(sessions({
     cookieName: "session",
