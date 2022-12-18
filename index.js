@@ -28,6 +28,13 @@ app.use(sessions({
 }));
 
 
+app.use((req, res, next)=>{
+    if(process.env.NODE_ENV === 'development'){
+        req["session"].secure = true;
+    }
+    next();
+});
+
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(cors({
