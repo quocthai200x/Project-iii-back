@@ -14,11 +14,12 @@ const port = process.env.port || 6969;
 
 app.use(sessions({
     cookieName: "session",
-    secureProxy: true,
+   
     secret: process.env.SESSION_SECRET,
     duration: process.env.MY_IMPOSSIIBLE_SECRET,
     activeDuration: parseInt((new Date()).getTime() / 1000, 10),
     cookie: {
+        secureProxy: process.env.NODE_ENV === 'development'? false : true,
         httpOnly: false,
         ephemeral: false,
         secure: process.env.NODE_ENV === 'development'? false : true,
