@@ -11,9 +11,11 @@ var router = require("./application/router")
 var path = require("path")
 const port = process.env.port || 6969;
 
-console.log(process.env.NODE_ENV)
+if(!(process.env.NODE_ENV.trim() === 'development')){
+   
+    app.set('trust proxy', true)
+}
 
-console.log()
 
 app.use(sessions({
     cookieName: "session",
@@ -22,22 +24,22 @@ app.use(sessions({
     duration: process.env.MY_IMPOSSIIBLE_SECRET,
     activeDuration: parseInt((new Date()).getTime() / 1000, 10),
     cookie: {
-        secureProxy: process.env.NODE_ENV.trim() === 'development' ? false : true,
-        httpOnly: false,
+        httpOnly: true,
         ephemeral: false,
         secure: process.env.NODE_ENV.trim() === 'development' ? false : true,
         sameSite:process.env.NODE_ENV.trim() === 'development'?true : "none",
     }
 }));
 
-app.use((req, res, next)=>{
-    if(!(process.env.NODE_ENV.trim() === 'development')){
-        app.set('trust proxy', true)
-        req["session"].secure = true;
-        req['session'].secureProxy = true
-    }
-    next();
-});
+// app.use((req, res, next)=>{
+//     if(!(process.env.NODE_ENV.trim() === 'development')){
+//         console.log("DZO")
+//         app.set('trust proxy', true)
+//         req["session"].secure = true;
+//         req['session'].secureProxy = true
+//     }
+//     next();
+// });
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
