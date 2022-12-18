@@ -7,9 +7,9 @@ const jobService = {
     getUserFavoriteJob: async (email) => {
         let userFound = await User.findOne({ email })
             .populate({path: "activity.jobSaved", 
-                    select:  { "info.name": 1, "info.salaryRate": 1, "info.workingAddress": 1 ,"info.recruitmentProcess": 1, "companyId": 1},
+                    select:  { "info.name": 1, "info.salaryRate": 1, "info.workingAddress": 1 ,"info.recruitmentProcess": 1,"info.outdate": 1, "companyId": 1},
                     populate :{
-                        path :"companyId", select: { "info.logo": 1, "info.name": 1 }
+                        path :"companyId", select: { "info.logo": 1, "info.name": 1,  }
                     }
                 })
     

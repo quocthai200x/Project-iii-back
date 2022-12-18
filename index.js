@@ -10,7 +10,7 @@ var morgan = require("morgan")
 var router = require("./application/router")
 var path = require("path")
 const port = process.env.port || 6969;
-console.log(process.env.NODE_ENV.trim())
+// console.log(process.env.NODE_ENV.trim())
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
@@ -19,36 +19,36 @@ app.use(cors({
     credentials: true
 }
 ))
-if (!(process.env.NODE_ENV.trim() === 'development')) {
-    app.set('trust proxy', true)
-}
+// if (!(process.env.NODE_ENV.trim() === 'development')) {
+//     app.set('trust proxy', true)
+// }
 
-app.use(sessions({
-    cookieName: "session",
-    secret: process.env.SESSION_SECRET,
-    duration: process.env.MY_IMPOSSIIBLE_SECRET,
-    activeDuration: parseInt((new Date()).getTime() / 1000, 10),
-    cookie: {
-        httpOnly: true,
-        ephemeral: false,
-        domain: process.env.NODE_ENV.trim() === 'development' ? undefined:"project-iii-front.vercel.app",
-        secureProxy: process.env.NODE_ENV.trim() === 'development' ? false : true,
-        sameSite: process.env.NODE_ENV.trim() === 'development' ? true : "none",
-    }
-}));
+// app.use(sessions({
+//     cookieName: "session",
+//     secret: process.env.SESSION_SECRET,
+//     duration: process.env.MY_IMPOSSIIBLE_SECRET,
+//     activeDuration: parseInt((new Date()).getTime() / 1000, 10),
+//     cookie: {
+//         // httpOnly: true,
+//         ephemeral: false,
+//         // domain: process.env.NODE_ENV.trim() === 'development' ? undefined:"project-iii-front.vercel.app",
+//         // secureProxy: process.env.NODE_ENV.trim() === 'development' ? false : true,
+//         // sameSite: process.env.NODE_ENV.trim() === 'development' ? true : "none",
+//     }
+// }));
 
-app.use(function(req, res, next) {
-    if (req.session.seenyou) {
-      res.setHeader('X-Seen-You', 'true');
-    } else {
-      // setting a property will automatically cause a Set-Cookie response
-      // to be sent
-      req.session.seenyou = true;
-      res.setHeader('X-Seen-You', 'false');
-    }
-    // console.log(res.header('X-Seen-You'))
-    next()
-  });
+// app.use(function(req, res, next) {
+//     if (req.session.seenyou) {
+//       res.setHeader('X-Seen-You', 'true');
+//     } else {
+//       // setting a property will automatically cause a Set-Cookie response
+//       // to be sent
+//       req.session.seenyou = true;
+//       res.setHeader('X-Seen-You', 'false');
+//     }
+//     // console.log(res.header('X-Seen-You'))
+//     next()
+//   });
 
 // app.use((req, res, next)=>{
 //     if(!(process.env.NODE_ENV.trim() === 'development')){

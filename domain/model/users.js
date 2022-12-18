@@ -112,7 +112,7 @@ UserSchema.methods.generateJWT = function(req){
         role: this.roleNumber,
         exp : parseInt(expirationDate.getTime()/1000,10)
     },process.env.JWT_SECRET)
-    req.session.userToken = jwtGenerate;
+    // req.session.userToken = jwtGenerate;
     return jwtGenerate;
 }
 

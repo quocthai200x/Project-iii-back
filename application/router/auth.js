@@ -10,14 +10,16 @@ const { Auth } = require("googleapis")
 
 
 
-router.post("/login", auth.optinal,async (req, res,next) => {
+router.post("/login", auth.optinal, async (req, res,next) => {
     const {email,password} = req.body;
+   
     if(!email || !password){
         res.status(400);
         res.json({
             code: "Please fill field"
         });
     }else{
+       
         return  passport.authenticate("local",{session:false},(err,user,next)=>{
             if(err){
                 console.log(err);
