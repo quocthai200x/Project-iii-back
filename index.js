@@ -31,6 +31,7 @@ app.use(sessions({
     cookie: {
         httpOnly: true,
         ephemeral: false,
+        domain: "project-iii-front.vercel.app",
         secureProxy: process.env.NODE_ENV.trim() === 'development' ? false : true,
         sameSite: process.env.NODE_ENV.trim() === 'development' ? true : "none",
     }
