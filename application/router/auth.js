@@ -29,7 +29,7 @@ router.post("/login", auth.optinal,async (req, res,next) => {
             if(user){
                 return res.json({
                     email:user.email,
-                    token : user.generateJWT(req)
+                    token : user.generateJWT(req ,res)
                 })
             }else if(!user){
                 res.status(400);
@@ -48,7 +48,7 @@ router.post("/register-user", auth.optinal, async (req, res) => {
     try {
         const user = await authService.signUpUser(email, password, name, phone);
         res.json({
-            token: user.generateJWT(req)
+            token: user.generateJWT(req ,res)
         });
     } catch (err) {
         res.status(400);
@@ -63,7 +63,7 @@ router.post("/register-admin", auth.optinal, async (req, res) => {
     try {
         const user = await authService.signUpAdmin(email, password, companyData);
         res.json({
-            token: user.generateJWT(req)
+            token: user.generateJWT(req ,res)
         });
     } catch (err) {
         res.status(400);
@@ -95,7 +95,7 @@ router.get("/me",auth.required, async(req,res)=>{
     // console.log(req.payload)
     try{
         const user = await userService.find(req.payload.email)
-        user.generateJWT(req)
+        user.generateJWT(req ,res)
         res.json({user})
     }catch (err) {
         res.status(400);
@@ -111,7 +111,7 @@ router.post("/change-password", auth.required, async(req,res)=>{
         const {oldPass, newPass} = req.body;
         const changedPass = await authService.changePass(email, oldPass, newPass)
         res.json({
-            token: changedPass.generateJWT(req)
+            token: changedPass.generateJWT(req ,res)
         });
     } catch (err) {
         res.status(400);

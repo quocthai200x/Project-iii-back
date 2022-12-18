@@ -10,7 +10,7 @@ var morgan = require("morgan")
 var router = require("./application/router")
 var path = require("path")
 const port = process.env.port || 6969;
-
+console.log(process.env.NODE_ENV.trim())
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
@@ -31,7 +31,7 @@ app.use(sessions({
     cookie: {
         httpOnly: true,
         ephemeral: false,
-        domain: process.env.NODE_ENV.trim() === 'development' ? "localhost":"project-iii-front.vercel.app",
+        domain: process.env.NODE_ENV.trim() === 'development' ? undefined:"project-iii-front.vercel.app",
         secureProxy: process.env.NODE_ENV.trim() === 'development' ? false : true,
         sameSite: process.env.NODE_ENV.trim() === 'development' ? true : "none",
     }
