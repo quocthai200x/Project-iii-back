@@ -5,7 +5,9 @@
   "license": "MIT",
   "scripts": {
     "start": "nodemon --inspect index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start2": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "echo \"Do nothing\""
   },
   "dependencies": {
     "@elastic/elasticsearch": "^8.5.0",
