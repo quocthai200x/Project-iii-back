@@ -44,4 +44,19 @@ router.post("/candidate", auth.required, authorize.canSearchCandidate,  async(re
     }
 })
 
+
+router.get("/candidate-for-company", auth.required, authorize.isCompany,  async(req,res)=>{
+    try {
+        const {pageNumber, limit } = req.query
+        const result = await searchService.searchCandidateForCompany(req.companyId, pageNumber, limit);
+        res.json(result);
+    } catch (err) {
+        res.status(400);
+        res.json({
+            code: err.message
+        })
+    }
+})
+
+
 module.exports = router;

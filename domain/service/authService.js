@@ -8,6 +8,25 @@ var Mail = require("./mailService")
 
 
 const authService = {
+    checkMailExisted: async(email) =>{
+        const userFound = await User.findOne({email})
+        if(userFound){
+            return {
+                data: {
+                    status: 1,
+                    roleNumber: userFound.roleNumber
+                },
+                message: "Found",
+            };
+        }else{
+            return {
+                data: {
+                    status: 0,
+                },
+                message: "Not found"
+            }
+        }
+    },
     signUpAdmin: async (email, password, companyData) => {
         try {
             const checkUser = await User.findOne({ email });

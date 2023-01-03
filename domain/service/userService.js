@@ -1,6 +1,7 @@
 // const Company = require("../model/companies");
 var Users = require("../model/users")
-var Jobs = require("../model/jobs")
+var Jobs = require("../model/jobs");
+const roleDictionary = require("../../config/dictionary/role");
 
 
 const userService = {
@@ -25,7 +26,21 @@ const userService = {
         return Users.find({ roleNumber: 1 }).select({ email: 1 })
     },
     find: async (email) => {
-        let user = await Users.findOne({ email }).select({ hash: 0, salt: 0 });
+        let user = await Users.findOne({ email })
+            .populate({
+                path: "companyId",
+                match: {
+                    roleNumber: 1 || 2
+                }
+            })
+            .populate({
+                path: "roleId",
+                match: {
+                    roleNumber: 2
+                }
+            })
+            .select({ hash: 0, salt: 0 })
+            .exec();
         if (user) {
             return user
         }

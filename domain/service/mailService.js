@@ -16,6 +16,16 @@ const Mail = {
         try {
             const accessToken = await oAuth2Client.getAccessToken();
             // console.log(accessToken);
+            // let transporter = nodemailer.createTransport({
+            //     host: "smtp.ethereal.email",
+            //     port: 587,
+            //     secure: false, // true for 465, false for other ports
+            //     auth: {
+            //       user:"quocthai2000xx@gmail.com", // generated ethereal user
+            //       pass: "Thai123456", // generated ethereal password
+            //     },
+            //   });
+
             let transporter = nodemailer.createTransport({
                 service: "gmail",
                 auth: {

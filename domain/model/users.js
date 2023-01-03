@@ -124,6 +124,7 @@ UserSchema.index({allowSearchInfo: 1},{partialFilterExpression: {"roleNumber" : 
 UserSchema.index({"info.typeWorking.name": 1},{partialFilterExpression: {"roleNumber" : 0}})
 UserSchema.index({"info.yearExperienced": 1},{partialFilterExpression: {"roleNumber" : 0}})
 UserSchema.index({"info.salaryTarget": 1},{partialFilterExpression: {"roleNumber" : 0}})
+UserSchema.index({updatedAt: 1},{partialFilterExpression: {"roleNumber" : 0}})
 
 var User = mongoose.model("User", UserSchema)
 

@@ -5,6 +5,26 @@ const Role = require("../domain/model/roles");
 
 
 const authorize = {
+    isCompany: async (req, res, next) => {
+        const { email } = req.payload;
+        const userFound = await Users.findOne({ email });
+        if (!userFound) {
+            res.status(400);
+            res.json({
+                message: "Not found user"
+            })
+        }
+        if (roleDictionary.isAdmin(userFound.roleNumber) || roleDictionary.isEmployee(userFound.roleNumber)) {
+            req.companyId = userFound.companyId
+            next();
+        }
+        else {
+            res.status(403)
+            res.json({
+                message: "Forbidden"
+            })
+        }
+    },
     isAdmin: async (req, res, next) => {
         const { email, role } = req.payload;
         const userFound = await Users.findOne({ email });

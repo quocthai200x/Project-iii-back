@@ -4,15 +4,38 @@ const Company = require("../model/companies")
 const User = require("../model/users")
 
 const jobService = {
+    getCountOfStatus: async (companyId) => {
+        try {
+            const currentDate = new Date();
+            const expirationThreshold = new Date(currentDate.getTime() + 7 * 24 * 60 * 60 * 1000);
+            // console.log(expirationThreshold)
+            const [show, draft, hidden, expiredIn7days] = await Promise.all([
+                Job.countDocuments({ companyId, "status.value": jobDictionary.status.show.value }),
+                Job.countDocuments({ companyId, "status.value": jobDictionary.status.draft.value }),
+                Job.countDocuments({ companyId, "status.value": jobDictionary.status.hidden.value }),
+                Job.countDocuments({ companyId, "info.outdate":  { $gte: currentDate, $lt: expirationThreshold } }),
+            ]);
+
+            // const check = await Job.find({ companyId, "info.outdate": { $gte: currentDate, $lt: expirationThreshold } }).select("info.outdate");
+
+            return {
+                show, draft, hidden, expiredIn7days
+            };
+        } catch (error) {
+            throw new Error(error)
+        }
+
+    },
     getUserFavoriteJob: async (email) => {
         let userFound = await User.findOne({ email })
-            .populate({path: "activity.jobSaved", 
-                    select:  { "info.name": 1, "info.salaryRate": 1, "info.workingAddress": 1 ,"info.recruitmentProcess": 1,"info.outdate": 1, "companyId": 1},
-                    populate :{
-                        path :"companyId", select: { "info.logo": 1, "info.name": 1,  }
-                    }
-                })
-    
+            .populate({
+                path: "activity.jobSaved",
+                select: { "info.name": 1, "info.salaryRate": 1, "info.workingAddress": 1, "info.recruitmentProcess": 1, "info.outdate": 1, "companyId": 1 },
+                populate: {
+                    path: "companyId", select: { "info.logo": 1, "info.name": 1, }
+                }
+            })
+
         if (userFound) {
             // console.log(userFound)
             return userFound.activity.jobSaved.reverse();

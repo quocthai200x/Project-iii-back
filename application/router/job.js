@@ -5,9 +5,23 @@ var auth = require("../../config/auth")
 const authorize = require("../../config/authorize")
 var searchService = require("../../domain/service/searchService")
 
+router.get('/status-count', auth.required, authorize.isCompany, async (req, res) => {
+    try {
+        const { companyId } = req;
 
+        const countedJob = await jobService.getCountOfStatus(companyId);
+        res.json(countedJob);
+
+
+    } catch (err) {
+        res.status(400);
+        res.json({
+            code: err.message
+        })
+    }
+})
 //  create new post
-router.get('/user-favorite', auth.required, authorize.isUser, async(req,res)=>{
+router.get('/user-favorite', auth.required, authorize.isUser, async (req, res) => {
     try {
 
         const { email } = req.payload;
@@ -22,9 +36,9 @@ router.get('/user-favorite', auth.required, authorize.isUser, async(req,res)=>{
 })
 
 
-router.get('/by-company-name/:companyName', async(req,res)=>{
+router.get('/by-company-name/:companyName', async (req, res) => {
     try {
-        const {companyName} = req.params;
+        const { companyName } = req.params;
         const jobFound = await jobService.getJobByCompanyName(companyName)
         res.json(jobFound)
     } catch (err) {
@@ -35,9 +49,9 @@ router.get('/by-company-name/:companyName', async(req,res)=>{
     }
 })
 
-router.post('/', auth.required,authorize.canWriteRecruitment ,async  (req, res) => {
+router.post('/', auth.required, authorize.canWriteRecruitment, async (req, res) => {
     try {
-        const {companyId} = req;
+        const { companyId } = req;
         const createdJob = await jobService.create(companyId, req.body);
         res.json(createdJob);
 
@@ -50,10 +64,10 @@ router.post('/', auth.required,authorize.canWriteRecruitment ,async  (req, res) 
 })
 
 // update
-router.put('/', auth.required,authorize.canWriteRecruitment ,async  (req, res) => {
+router.put('/', auth.required, authorize.canWriteRecruitment, async (req, res) => {
     try {
-        const {companyId} = req;
-        const {info,jobName} = req.body;
+        const { companyId } = req;
+        const { info, jobName } = req.body;
         const updatedJob = await jobService.update(companyId, jobName, info);
         res.json(updatedJob);
 
@@ -66,9 +80,9 @@ router.put('/', auth.required,authorize.canWriteRecruitment ,async  (req, res) =
 })
 
 
-router.get("/others/:jobName_idCompany", auth.optinal, async(req, res)=>{
+router.get("/others/:jobName_idCompany", auth.optinal, async (req, res) => {
     try {
-        const {jobName_idCompany} = req.params;
+        const { jobName_idCompany } = req.params;
         let arr = jobName_idCompany.split('---');
         const jobFound = await jobService.getOtherJobsByCompany(arr[0], arr[1])
         res.json(jobFound)
@@ -81,9 +95,9 @@ router.get("/others/:jobName_idCompany", auth.optinal, async(req, res)=>{
 })
 
 
-router.get("/:jobName_idCompany", auth.optinal, async(req, res)=>{
+router.get("/:jobName_idCompany", auth.optinal, async (req, res) => {
     try {
-        const {jobName_idCompany} = req.params;
+        const { jobName_idCompany } = req.params;
         let arr = jobName_idCompany.split('---');
         const jobFound = await jobService.getJobByName(arr[0], arr[1])
         res.json(jobFound)
@@ -95,10 +109,10 @@ router.get("/:jobName_idCompany", auth.optinal, async(req, res)=>{
     }
 })
 
-router.put('/update-status', auth.required,authorize.canWriteRecruitment ,async  (req, res) => {
+router.put('/update-status', auth.required, authorize.canWriteRecruitment, async (req, res) => {
     try {
-        const {companyId} = req;
-        const {status,jobName} = req.body;
+        const { companyId } = req;
+        const { status, jobName } = req.body;
         const updatedJob = await jobService.updateStatus(companyId, jobName, status);
         res.json(updatedJob);
 
@@ -110,9 +124,9 @@ router.put('/update-status', auth.required,authorize.canWriteRecruitment ,async 
     }
 })
 
-router.put('/update-view/:jobName_idCompany', auth.required, authorize.isUser, async(req,res)=>{
+router.put('/update-view/:jobName_idCompany', auth.required, authorize.isUser, async (req, res) => {
     try {
-        const {jobName_idCompany} = req.params;
+        const { jobName_idCompany } = req.params;
         let arr = jobName_idCompany.split('---');
         const updated = await jobService.updateView(arr[0], arr[1])
         res.json(updated)
@@ -124,10 +138,10 @@ router.put('/update-view/:jobName_idCompany', auth.required, authorize.isUser, a
     }
 })
 
-router.get("/count-in-field/:field" , async(req,res)=>{
+router.get("/count-in-field/:field", async (req, res) => {
     // console.log("ab");
     try {
-        const {field} = req.params
+        const { field } = req.params
         const result = await jobService.countInField(field);
         res.json(result);
     } catch (err) {

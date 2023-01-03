@@ -8,7 +8,20 @@ var auth = require("../../config/auth")
 var authorize = require("../../config/authorize")
 const { Auth } = require("googleapis")
 
-
+router.post("/check-email", async(req,res)=>{
+    const {email} = req.body;
+    try {
+        const response = await authService.checkMailExisted(email);
+        res.json({
+           response
+        });
+    } catch (err) {
+        res.status(400);
+        res.json({
+            code: err.message
+        });
+    }
+})
 
 router.post("/login", auth.optinal, async (req, res,next) => {
     const {email,password} = req.body;
@@ -97,7 +110,7 @@ router.get("/me",auth.required, async(req,res)=>{
     // console.log(req.payload)
     try{
         const user = await userService.find(req.payload.email)
-        user.generateJWT(req ,res)
+        // user.generateJWT(req ,res)
         res.json({user})
     }catch (err) {
         res.status(400);
