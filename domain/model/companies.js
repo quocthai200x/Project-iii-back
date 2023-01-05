@@ -26,7 +26,10 @@ let companyInfoSchema = new Schema( {
     name: { type: String, default: "" },
     phone: { type: String, default: "" },
     location: [workingAddress],
-    size: { type: Number, default: 0 },
+    size: {
+        label: {type:String, default:"50-100"},
+        value: {type: Number, default: 4},
+    },
     workingArea: [TypeSchema],
     benefits: [benefitSchema],
     desc: { type: String, default: "" },

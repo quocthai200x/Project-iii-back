@@ -3,18 +3,18 @@ var Company = require("../model/companies")
 var mongoose = require("../../infrastructure/db");
 
 const CompanyService = {
-    get:async (companyName)=>{
-        const company = await Company.findOne({'info.name': companyName}).select({info: 1});
-        if(company){
+    get: async (companyName) => {
+        const company = await Company.findOne({ 'info.name': companyName }).select({ info: 1 });
+        if (company) {
             return company
-        }else{
+        } else {
             throw new Error("Not found")
         }
 
     },
     update: async (data, companyId) => {
         const company = await Company.findById(companyId);
-        if(company){
+        if (company) {
             data.name = company.info.name;
             company.info = data;
             const updatedCompany = await company.save()
@@ -24,27 +24,26 @@ const CompanyService = {
             else {
                 throw new Error("Error: update fail")
             }
-        }else{
+        } else {
             throw new Error("Not found")
         }
     },
     updateModel: async () => {
-        const companyFound = await Company.find();
-        companyFound.forEach((company, index) => {
-            let newJobInfo = company.info
-            newJobInfo.video= "https://www.youtube.com/embed/7tz4Ya6gzG4"
-            company.info = newJobInfo
-            let res = company.save();
-            if (index == companyFound.length - 1) {
-                if (res) {
-                    return res
-                } else {
-                    throw new Error("Lỗi")
-                }
+        Company.updateMany({}, {
+            $set: {
+                "info.size": {
+                    label: "50-100",
+                    value: 4
+                },
             }
-
-
-        })
+        }, function (err, affected) {
+            if (err) {
+                throw new Error("Some thing wrong")
+            } else {
+                console.log('Updated %d documents', affected);
+                return affected
+            }
+        });
     }
 }
 

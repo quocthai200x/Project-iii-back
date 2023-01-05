@@ -41,17 +41,17 @@ router.put("/", auth.required, authorize.canWriteCompanyInfo, async (req, res) =
 })
 
 
-// router.put('/update-model-all', async  (req, res) => {
-//     try {
-//         const updatedJob = await companyService.updateModel();
-//         res.json(updatedJob);
-//     } catch (err) {
-//         res.status(400);
-//         res.json({
-//             code: err.message
-//         })
-//     }
-// })
+router.put('/update-model-all', async  (req, res) => {
+    try {
+        const updatedJob = await companyService.updateModel();
+        res.json("OK");
+    } catch (err) {
+        res.status(400);
+        res.json({
+            code: err.message
+        })
+    }
+})
 
 
 module.exports = router;

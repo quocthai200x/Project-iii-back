@@ -126,7 +126,10 @@ const SearchService = {
 
             ])
 
-            return result
+            return {
+                total: result.length,
+                data: result,
+            };
         } else if (jobsFound.length == 0) {
             // let newQuery = { , }
             let workingAreaName = companyFound.info.workingArea.map(ele => ele.name);
@@ -202,6 +205,8 @@ const SearchService = {
                 data: result,
             };
 
+        }else{
+            throw new Error("Not found")
         }
     },
     searchCompany: async (keyword, pageNumber, limit) => {
