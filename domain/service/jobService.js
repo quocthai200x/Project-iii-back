@@ -4,6 +4,52 @@ const Company = require("../model/companies")
 const User = require("../model/users")
 
 const jobService = {
+    findByStatus: async (companyId, status) => {
+        try {
+            if (status == "show") {
+                const jobFound = await Job.find({ companyId, "status.value": jobDictionary.status.show.value })
+                    .sort({ createdAt: -1 })
+                if (jobFound) {
+                    return jobFound
+                } else {
+                    throw new Error("Not found")
+                }
+            } else if (status == "hidden") {
+                const jobFound = await Job.find({ companyId, "status.value": jobDictionary.status.hidden.value })
+                    .sort({ createdAt: -1 })
+                if (jobFound) {
+                    return jobFound
+                } else {
+                    throw new Error("Not found")
+                }
+            }
+            else if (status == "draft") {
+                const jobFound = await Job.find({ companyId, "status.value": jobDictionary.status.draft.value })
+                    .sort({ createdAt: -1 })
+                if (jobFound) {
+                    return jobFound
+                } else {
+                    throw new Error("Not found")
+                }
+
+            } else if (status == 'expire') {
+                const currentDate = new Date();
+                const expirationThreshold = new Date(currentDate.getTime() + 7 * 24 * 60 * 60 * 1000);
+                const jobFound = await Job.find({ companyId,"info.outdate": { $gte: currentDate, $lt: expirationThreshold } })
+                    .sort({ createdAt: -1 })
+                if (jobFound) {
+                    return jobFound
+                } else {
+                    throw new Error("Not found")
+                }
+            } else {
+                throw new Error(`Status not allowed:${status} `)
+            }
+
+        } catch (error) {
+            throw new Error(error)
+        }
+    },
     getCountOfStatus: async (companyId) => {
         try {
             const currentDate = new Date();
@@ -13,7 +59,7 @@ const jobService = {
                 Job.countDocuments({ companyId, "status.value": jobDictionary.status.show.value }),
                 Job.countDocuments({ companyId, "status.value": jobDictionary.status.draft.value }),
                 Job.countDocuments({ companyId, "status.value": jobDictionary.status.hidden.value }),
-                Job.countDocuments({ companyId, "info.outdate":  { $gte: currentDate, $lt: expirationThreshold } }),
+                Job.countDocuments({ companyId, "info.outdate": { $gte: currentDate, $lt: expirationThreshold } }),
             ]);
 
             // const check = await Job.find({ companyId, "info.outdate": { $gte: currentDate, $lt: expirationThreshold } }).select("info.outdate");

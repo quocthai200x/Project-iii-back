@@ -94,6 +94,21 @@ router.get("/others/:jobName_idCompany", auth.optinal, async (req, res) => {
     }
 })
 
+router.get("/status/:status", auth.required, authorize.isCompany, async (req, res) => {
+    try {
+        const { companyId } = req;
+        const { status } = req.params;
+        const jobFound = await jobService.findByStatus(companyId, status);
+        res.json(jobFound)
+    } catch (err) {
+        res.status(400);
+        res.json({
+            code: err.message
+        })
+    }
+})
+
+
 
 router.get("/:jobName_idCompany", auth.optinal, async (req, res) => {
     try {

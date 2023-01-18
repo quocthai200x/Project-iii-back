@@ -23,7 +23,7 @@ router.post("/check-email", async(req,res)=>{
     }
 })
 
-router.post("/login", auth.optinal, async (req, res,next) => {
+router.post("/login", async (req, res,next) => {
     const {email,password} = req.body;
    
     if(!email || !password){
