@@ -5,6 +5,20 @@ var auth = require("../../config/auth")
 const authorize = require("../../config/authorize")
 var searchService = require("../../domain/service/searchService")
 
+
+router.get('/jobs-name', auth.required, authorize.isCompany, async(req,res)=>{
+    try {
+        const { companyId } = req;
+        const listJobsName = await jobService.getListJobsName(companyId);
+        res.json(listJobsName);
+    } catch (err) {
+        res.status(400);
+        res.json({
+            code: err.message
+        })
+    }
+})
+
 router.get('/status-count', auth.required, authorize.isCompany, async (req, res) => {
     try {
         const { companyId } = req;

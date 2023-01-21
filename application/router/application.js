@@ -4,6 +4,22 @@ var router = express.Router()
 var auth = require("../../config/auth")
 const authorize = require("../../config/authorize")
 
+
+router.get('/by-job-name', auth.required, authorize.canReadApplier, async(req,res)=>{
+    const {companyId} = req;
+    const {jobName} = req.query
+    try {
+        const result = await applicationService.findByJobName(jobName, companyId)
+        res.json(result);
+    } catch (err) {
+        res.status(400);
+        res.json({
+            error: err.message
+        });
+    }
+})
+
+
 router.get("/by-user-with-job", auth.required, authorize.isUser, async(req,res) =>{
     const {userId} = req;
     const {jobId} = req.query

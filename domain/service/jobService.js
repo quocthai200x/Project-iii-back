@@ -4,6 +4,19 @@ const Company = require("../model/companies")
 const User = require("../model/users")
 
 const jobService = {
+    getListJobsName: async(companyId)=>{
+        try {
+            const jobsFound = await Job.find({companyId,  "status.value": jobDictionary.status.show.value }).select({"info.name": 1, "info.recruitmentProcess": 1})
+            if(jobsFound){
+                return jobsFound;
+            }else{
+                throw new Error("Not found")
+            }
+        } catch (error) {
+            throw new Error(error)
+            
+        }
+    }, 
     findByStatus: async (companyId, status) => {
         try {
             if (status == "show") {

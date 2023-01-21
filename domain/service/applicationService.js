@@ -9,9 +9,25 @@ const path = require("path")
 
 
 const ApplicationService = {
+    findByJobName: async (jobName, companyId) => {
+        const jobFound =  await Job.findOne({companyId, "info.name": jobName}).select({_id: 1})
+        console.log(jobFound)
+        if(jobFound){
+            const applicationFound = Application.find({ companyId, jobId: jobFound._id }).populate({ path: "candidateId", select: "info" })
+            if (applicationFound) {
+                return applicationFound
+            } else {
+                throw new Error("Not found")
+            }
+             return 1
+        }else {
+            throw new Error("Not found")
+        }
+
+    },
     getAllByUser: async (candidateId) => {
         const applicationFound = Application.find({ candidateId }).sort({ updatedAt: -1 })
-            .populate({ path: "jobId", select: { "info.name": 1, "info.salaryRate": 1, "info.workingAddress": 1 ,"info.recruitmentProcess": 1}, })
+            .populate({ path: "jobId", select: { "info.name": 1, "info.salaryRate": 1, "info.workingAddress": 1, "info.recruitmentProcess": 1 }, })
             .populate({ path: "companyId", select: { "info.logo": 1, "info.name": 1 } })
         if (applicationFound) {
             return applicationFound
@@ -139,7 +155,7 @@ const ApplicationService = {
     },
 
 
-    
+
     rejectByUser: async (userId, applicationId) => {
         const applicationFound = await Application.findById(applicationId);
         if (applicationFound
@@ -180,10 +196,10 @@ const ApplicationService = {
         const applicationFound = await Application.findById(applicationId).populate({ path: "jobId", select: "info.recruitmentProcess" })
         if (applicationFound
             && applicationFound.companyId.toString() == companyId
-            &&(applicationFound.status.value < applicationDictionary.status.rejectByUser.value
+            && (applicationFound.status.value < applicationDictionary.status.rejectByUser.value
                 || applicationFound.status.value < applicationDictionary.status.notQualify.value
                 || applicationFound.status.value < applicationDictionary.status.getHired.value)
-                
+
         ) {
             let interviewStatus = null;
             console.log(applicationFound.jobId.info.recruitmentProcess)
@@ -206,7 +222,7 @@ const ApplicationService = {
             if (type == 'offer' && applicationFound.status.value == applicationDictionary.status.interview.value) {
                 interviewStatus = applicationDictionary.status.offer
             }
-            if(!interviewStatus){
+            if (!interviewStatus) {
                 throw new Error("Something wrong with type")
             }
             applicationFound.status = interviewStatus;
