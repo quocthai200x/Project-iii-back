@@ -9,18 +9,30 @@ const path = require("path")
 
 
 const ApplicationService = {
+    findOneInCompany: async (applicationId, companyId) => {
+        console.log(applicationId)
+        const applicationFound = Application.findOne({_id: applicationId, companyId})
+            .populate({ path: "candidateId", select: { "info.name": 1, "info.salaryRate": 1, "info.workingAddress": 1, "info.recruitmentProcess": 1 }, })
+            .populate({ path: "jobId", select: { "info.name": 1, "info.salaryRate": 1, "info.workingAddress": 1, "info.recruitmentProcess": 1 }, })
+            .populate({ path: "companyId", select: { "info.logo": 1, "info.name": 1 } })
+        if (applicationFound) {
+            return applicationFound
+        } else {
+            throw new Error("Not found")
+        }
+    },
     findByJobName: async (jobName, companyId) => {
-        const jobFound =  await Job.findOne({companyId, "info.name": jobName}).select({_id: 1})
+        const jobFound = await Job.findOne({ companyId, "info.name": jobName }).select({ _id: 1 })
         console.log(jobFound)
-        if(jobFound){
+        if (jobFound) {
             const applicationFound = Application.find({ companyId, jobId: jobFound._id }).populate({ path: "candidateId", select: "info" })
             if (applicationFound) {
                 return applicationFound
             } else {
                 throw new Error("Not found")
             }
-             return 1
-        }else {
+            return 1
+        } else {
             throw new Error("Not found")
         }
 
