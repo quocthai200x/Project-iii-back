@@ -10,13 +10,26 @@ const path = require("path")
 
 const ApplicationService = {
     findOneInCompany: async (applicationId, companyId) => {
-        console.log(applicationId)
-        const applicationFound = Application.findOne({_id: applicationId, companyId})
-            .populate({ path: "candidateId", select: { "info.name": 1, "info.salaryRate": 1, "info.workingAddress": 1, "info.recruitmentProcess": 1 }, })
-            .populate({ path: "jobId", select: { "info.name": 1, "info.salaryRate": 1, "info.workingAddress": 1, "info.recruitmentProcess": 1 }, })
-            .populate({ path: "companyId", select: { "info.logo": 1, "info.name": 1 } })
+
+        const applicationFound = await Application.findOne({ _id: applicationId, companyId })
+            .populate({ path: "candidateId", select: { "info": 1 } })
+            .populate({ path: "jobId", select: { "info": 1 } })
+            .lean()
+        // .populate({ path: "companyId", select: { "info.logo": 1, "info.name": 1 } })
         if (applicationFound) {
-            return applicationFound
+            const [countTurnIn, countApprove, countInterview, countOffer, countGetHired, countRejectByUser, countNotQualify] = await Promise.all([
+                Application.countDocuments({ jobId: applicationFound.jobId._id, "status.value": applicationDictionary.status.turnIn.value }).lean(),
+                Application.countDocuments({ jobId: applicationFound.jobId._id, "status.value": applicationDictionary.status.approve.value }).lean(),
+                Application.countDocuments({ jobId: applicationFound.jobId._id, "status.value": applicationDictionary.status.interview.value }).lean(),
+                Application.countDocuments({ jobId: applicationFound.jobId._id, "status.value": applicationDictionary.status.offer.value }).lean(),
+                Application.countDocuments({ jobId: applicationFound.jobId._id, "status.value": applicationDictionary.status.getHired.value }).lean(),
+                Application.countDocuments({ jobId: applicationFound.jobId._id, "status.value": applicationDictionary.status.rejectByUser.value }).lean(),
+                Application.countDocuments({ jobId: applicationFound.jobId._id, "status.value": applicationDictionary.status.notQualify.value }).lean(),
+            ]);
+            return {
+                data: applicationFound,
+                countTurnIn, countApprove, countInterview, countOffer, countGetHired, countRejectByUser, countNotQualify
+            }
         } else {
             throw new Error("Not found")
         }
@@ -152,7 +165,7 @@ const ApplicationService = {
         const applicationFound = await Application.findById(applicationId);
         if (applicationFound
             && applicationFound.companyId.toString() == companyId
-            && applicationDictionary.created.isUser(applicationFound.createdBy)
+
         ) {
             applicationFound.status = applicationDictionary.status.notQualify
             const result = await applicationFound.save();
@@ -215,14 +228,21 @@ const ApplicationService = {
         ) {
             let interviewStatus = null;
             console.log(applicationFound.jobId.info.recruitmentProcess)
+            // đang giai đoạn approve mới được value 1 (approve --> interview)
             if (type == 'set-interview' && applicationFound.status.value == applicationDictionary.status.approve.value) {
                 interviewStatus = applicationDictionary.status.interview
                 if (applicationFound.jobId.info.recruitmentProcess.length > 0) {
                     interviewStatus.note = applicationFound.jobId.info.recruitmentProcess[0]
                 }
             }
+            // giai đoạn nếu có vòng phỏng vấn value 2 (invterview --> interview)
             if (type == 'continue-interview'
-                && applicationFound.status.value == applicationDictionary.status.interview.value
+                &&
+                (
+                    applicationFound.status.value == applicationDictionary.status.interview.value
+
+                    || (statusIndex == 0 && applicationFound.status.value == applicationDictionary.status.approve.value)
+                )
                 && applicationFound.jobId.info.recruitmentProcess.length > 0
             ) {
                 interviewStatus = applicationDictionary.status.interview
@@ -231,6 +251,7 @@ const ApplicationService = {
                 }
                 interviewStatus.note = applicationFound.jobId.info.recruitmentProcess[statusIndex]
             }
+            // giai đoạn có thể ấn offer value 2 (interview --> offer)
             if (type == 'offer' && applicationFound.status.value == applicationDictionary.status.interview.value) {
                 interviewStatus = applicationDictionary.status.offer
             }
