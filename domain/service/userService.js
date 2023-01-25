@@ -5,6 +5,23 @@ const roleDictionary = require("../../config/dictionary/role");
 
 
 const userService = {
+    getAllEmployeeOfCompany: async (companyId) => {
+        const usersFound = await Users
+            .find({ companyId, roleNumber: 2 })
+            .select({ jobId: 1, email: 1, "info.name": 1, updatedAt: 1 })
+            .populate({
+                path: "roleId",
+                select: {
+                    name: 1
+                }
+            })
+        if (usersFound) {
+            return usersFound
+        }
+        else {
+            throw new Error("Lỗi")
+        }
+    },
     updateModel: async () => {
         const userFound = await Users.find();
         userFound.forEach((user, index) => {

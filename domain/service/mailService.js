@@ -13,7 +13,7 @@ const Mail = {
 
         const oAuth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET, REFRESH_TOKEN)
         oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN })
-        try {
+       
             const accessToken = await oAuth2Client.getAccessToken();
             // console.log(accessToken);
             // let transporter = nodemailer.createTransport({
@@ -58,11 +58,9 @@ const Mail = {
             if(info){
                 return true
             }else{
-                throw new Error("Send fail")
+                return false
             }
-        } catch (error) {
-            throw new Error(error);
-        }
+        
     }
 }
 

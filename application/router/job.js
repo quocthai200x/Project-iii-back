@@ -6,6 +6,8 @@ const authorize = require("../../config/authorize")
 var searchService = require("../../domain/service/searchService")
 
 
+
+
 router.get('/jobs-name', auth.required, authorize.isCompany, async(req,res)=>{
     try {
         const { companyId } = req;

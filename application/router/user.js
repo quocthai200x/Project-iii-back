@@ -5,6 +5,8 @@ const roleService = require("../../domain/service/roleService")
 var auth = require("../../config/auth")
 var authorize = require("../../config/authorize")
 
+
+
 router.put("/", auth.required, async (req, res) => {
     const { email } = req.payload;
     try {
@@ -18,6 +20,21 @@ router.put("/", auth.required, async (req, res) => {
     }
 
 })
+
+router.get("/employee", auth.required, authorize.canReadSystemSettings, async (req, res) => {
+    const { companyId } = req;
+    try {
+        const list = await userService.getAllEmployeeOfCompany(companyId);
+        res.json(list)
+    } catch (err) {
+        res.status(400);
+        res.json({
+            error: err.message
+        });
+    }
+})
+
+
 
 router.post("/attach-role", auth.required, authorize.canWriteUserPermission, async (req, res) => {
     const { roleName, targetEmail } = req.body;

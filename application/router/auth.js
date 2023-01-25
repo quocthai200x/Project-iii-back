@@ -93,9 +93,7 @@ router.post("/register-employee", auth.required, authorize.isAdmin, async (req, 
     const { email, roleName, name } = req.body;
     try {
         const user = await authService.addEmployee(email, req.companyId, roleName, name);
-        res.json({
-            success: true
-        });
+        res.json(user);
     } catch (err) {
         res.status(400);
         res.json({

@@ -45,6 +45,40 @@ const authorize = {
             })
         }
     },
+    canReadSystemSettings: async (req, res, next) => {
+        const { email } = req.payload;
+        const userFound = await Users.findOne({ email });
+        if (!userFound) {
+            res.status(400);
+            res.json({
+                message: "Not found user"
+            })
+        }
+        if (roleDictionary.isAdmin(userFound.roleNumber)) {
+            req.companyId = userFound.companyId
+        
+            next();
+        }
+        else if (roleDictionary.isEmployee(userFound.roleNumber)) {
+            const roleFound = await Role.findById(userFound.roleId);
+            if (roleFound.settings.systemFunction.canRead) {
+                req.companyId = userFound.companyId
+                next();
+            }
+            else {
+                res.status(403);
+                res.json({
+                    message: "Forbidden"
+                })
+            }
+        }
+        else {
+            res.status(403)
+            res.json({
+                message: "Forbidden"
+            })
+        }
+    },
     canWriteRecruitment: async (req, res, next) => {
         const { email } = req.payload;
         const userFound = await Users.findOne({ email });

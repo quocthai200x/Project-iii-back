@@ -8,9 +8,9 @@ var Mail = require("./mailService")
 
 
 const authService = {
-    checkMailExisted: async(email) =>{
-        const userFound = await User.findOne({email})
-        if(userFound){
+    checkMailExisted: async (email) => {
+        const userFound = await User.findOne({ email })
+        if (userFound) {
             return {
                 data: {
                     status: 1,
@@ -18,7 +18,7 @@ const authService = {
                 },
                 message: "Found",
             };
-        }else{
+        } else {
             return {
                 data: {
                     status: 0,
@@ -66,44 +66,50 @@ const authService = {
 
 
     addEmployee: async (email, companyId, roleName, name) => {
-        try {
-            const checkUser = await User.findOne({ email });
-            const checkRole = await Role.findOne({name: roleName, companyId})
-            if (checkUser) {
-                throw new Error("User found")
+
+        const [checkUser, checkRole] = await Promise.all([
+            User.findOne({ email }),
+            Role.findOne({ name: roleName, companyId })
+        ])
+        if (checkUser) {
+            throw new Error("User found")
+        }
+        if (!checkRole) {
+            throw new Error("Role not found")
+        }
+        const newUser = new User({
+            email: email,
+            roleNumber: RoleDictionary.employee,
+            companyId,
+            roleId: checkRole,
+        });
+        let password = generator.generate({
+            length: 10,
+            numbers: true
+        });
+        newUser.setPassword(password)
+        newUser.info.name = name
+        try{
+
+            const [result, sendMail] = await Promise.all([
+                newUser.save(),
+                Mail.sendMail(email, password),
+            ])
+           
+            if (result && sendMail) {
+                return newUser;
             }
-            if (!checkRole) {
-                throw new Error("Role not found")
-            }
-            const newUser = new User({
-                email: email,
-                roleNumber: RoleDictionary.employee,
-                companyId,
-                roleId: checkRole,
-            });
-            let password = generator.generate({
-                length: 10,
-                numbers: true
-            });
-            newUser.setPassword(password)
-            newUser.info.name = name
-            result = await newUser.save();
-            if (result) {
-                const sendMail = await Mail.sendMail(email, password);
-                if (sendMail) {
-                    return result;
-                }
-                else {
-                    throw new Error("Cant send mail")
-                }
-            } else {
+            else {
                 throw new Error("cant create employee")
             }
-        } catch (err) {
-            const delUser = await User.findOneAndDelete({ email })
-            throw new Error(err)
+        }catch(error){
+            await User.findOneAndDelete({email})
+            throw new Error("cant create employee")
         }
+
+
     },
+
 
     signUpUser: async (email, password, name, phone) => {
         let result = await User.findOne({ "email": email });
@@ -146,7 +152,7 @@ const authService = {
     },
     forgotPassword: async (email) => {
         const userFound = await User.findOne({ email });
-        if(userFound){
+        if (userFound) {
             let password = generator.generate({
                 length: 10,
                 numbers: true
@@ -159,13 +165,13 @@ const authService = {
                     return result;
                 }
                 else {
-    
+
                     throw new Error("Cant send mail")
                 }
             } else {
                 throw new Error("cant reset password")
             }
-        }else{
+        } else {
             throw new Error("cant find user")
         }
 
