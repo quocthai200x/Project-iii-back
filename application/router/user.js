@@ -49,6 +49,19 @@ router.post("/attach-role", auth.required, authorize.canWriteUserPermission, asy
         });
     }
 })
+router.get('/candidate/:userId', auth.required, authorize.isCompany, async(req,res)=>{
+    const { userId } = req.params 
+    try {
+        const candidate = await userService.getCandidate(userId);
+        res.json(candidate)
+    } catch (err) {
+        res.status(400);
+        res.json({
+            error: err.message
+        });
+    }
+})
+
 
 
 router.get('/get-all-company-email', async (req, res) => {

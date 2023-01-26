@@ -11,7 +11,7 @@ const db = {
 
 };
 
-mongoose.connect(db.url,db.options);
+mongoose.connect(db.url,db.options, ()=>console.log("Connected Mongodb"));
 
 
 module.exports = mongoose;

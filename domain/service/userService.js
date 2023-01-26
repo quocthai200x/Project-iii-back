@@ -1,10 +1,36 @@
 // const Company = require("../model/companies");
 var Users = require("../model/users")
-var Jobs = require("../model/jobs");
+var Jobs = require("../model/jobs")
+var Applications = require("../model/applications");
+
 const roleDictionary = require("../../config/dictionary/role");
+const User = require("../model/users");
 
 
 const userService = {
+    getCandidate: async(userId) =>{
+        const [userFound, applicationFound] = await Promise.all([
+            User.findById(userId).select({
+                hash: 0,
+                salt: 0,
+                activity: 0,
+                info:{
+                    allowSearchInfo: 0,
+                },
+                createdAt: 0,  
+                isForgotPassword: 0,
+            }).lean(),
+            Applications.findOne({candidateId: userId})
+        ]) 
+        if(userFound && userFound.roleNumber == 0){
+            return {
+                userData: userFound,
+                isApplied: applicationFound?true:false,
+            };
+        }else{
+            throw new Error("Not found")
+        }
+    },
     getAllEmployeeOfCompany: async (companyId) => {
         const usersFound = await Users
             .find({ companyId, roleNumber: 2 })

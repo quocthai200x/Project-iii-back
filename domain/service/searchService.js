@@ -276,11 +276,12 @@ const SearchService = {
 
         }
         let newDate = new Date()
-        newDate.setDate(newDate.getDate() + 3);
+        newDate.setDate(newDate.getDate());
         let checkDate = { "info.outdate": { $gt: newDate } }
         let checkStatus = { 'status.value': 0 }
         let newQuery = { ...query, ...checkDate, ...body.filter, ...checkStatus }
         // console.log(newQuery)
+        let total = 0;
         let result;
         if (body.text) {
             result = await Job.find(newQuery).sort({ score: { $meta: "textScore" } }).limit(limit).skip(limit * pageNumber)
@@ -289,7 +290,7 @@ const SearchService = {
                     companyId: 1,
                     // status: 0,
                     info: {
-                        name :1,
+                        name: 1,
                         type: {
                             name: 1,
                         },
@@ -299,7 +300,7 @@ const SearchService = {
                         salaryRate: 1,
                         keyword: 1,
                         outdate: 1,
-                        
+
                     },
                     createdAt: 1,
                     updatedAt: 1,
@@ -313,7 +314,7 @@ const SearchService = {
                     companyId: 1,
                     // status: 0,
                     info: {
-                        name :1,
+                        name: 1,
                         type: {
                             name: 1,
                         },
@@ -323,7 +324,7 @@ const SearchService = {
                         salaryRate: 1,
                         keyword: 1,
                         outdate: 1,
-                        
+
                     },
                     createdAt: 1,
                     updatedAt: 1,
@@ -331,8 +332,9 @@ const SearchService = {
                 .populate({ path: "companyId", select: { "info.name": 1, "info.logo": 1 } });
         }
         //TO DO: làm thêm filter skip limit offset
+        total = await Job.count(newQuery)
         if (result) {
-            return { total: result.length, data: result };
+            return { total: total, data: result };
         } else {
             throw new Error(" error")
         }
@@ -349,34 +351,37 @@ const SearchService = {
         pageNumber = parseInt(pageNumber)
         limit = parseInt(limit)
         let candidateIds = await Application.distinct('candidateId', { companyId })
-        //     if (body.text) {
-        //         query.$text = {}
-        //         query.$text.$search = body.text;
-        //         let newQuery = { ...query,"_id":{"$nin": candidateIds}  , roleNumber: 0, "info.allowSearchInfo": true, ...body.filter, }
-        //         // console.log(newQuery)
-        //         result = await User.find(newQuery).sort({ score: { $meta: "textScore" } }).limit(limit).skip(limit * pageNumber).select({ info: 1, email: 1 })
-        //         //TO DO: làm thêm filter skip limit offset
-        //         if (result) {
-        //             return {
-        //                 total: result.length,
-        //                 data: result,
-        //             };
-        //         } else {
-        //             throw new Error(" error")
-        //         }
-        //     }else{
-        //         let newQuery = {roleNumber: 0,  ...query,"_id":{"$nin": candidateIds}  ,  "info.allowSearchInfo": true, ...body.filter, }
-        //         result = await User.find(newQuery).sort({ updatedAt: 1 }).limit(limit).skip(limit * pageNumber).select({ info: 1, email: 1 })
-        //         if (result) {
-        //             return {
-        //                 total: result.length,
-        //                 data: result,
-        //             };
-        //         } else {
-        //             throw new Error(" error")
-        //         }
-        //     }
 
+        let pipelineCount =  [
+            ...(body.text
+                ? [
+                    {
+                        $match: {
+                            $text: {
+                                $search: body.text,
+                            },
+                        },
+                    },
+                ]
+                : []),
+            // sort results by 'updatedAt' field if 'body.text' is not present
+        
+            {
+                $match: {
+                    roleNumber: 0,
+                    "info.allowSearchInfo": true,
+                    ...body.filter,
+                    _id: { $nin: candidateIds },
+                },
+            },
+
+            // filter results based on 'roleNumber', 'info.allowSearchInfo', and other fields in the 'body.filter' object
+
+            {
+                $count: "total"
+            },
+
+        ]
         let pipeline = [
             // exclude candidates that already exist in the 'Application' collection
             // perform text search if 'body.text' is present
@@ -417,8 +422,7 @@ const SearchService = {
 
             // filter results based on 'roleNumber', 'info.allowSearchInfo', and other fields in the 'body.filter' object
 
-
-
+          
 
             // limit and skip results based on 'limit' and 'pageNumber' values
             {
@@ -430,6 +434,7 @@ const SearchService = {
             // select only the 'info' and 'email' fields from the resulting documents
             {
                 $project: {
+                    
                     "info.name": 1,
                     "info.avatar": 1,
                     "info.address": 1,
@@ -447,10 +452,14 @@ const SearchService = {
                 },
             },
         ];
-        let result = await User.aggregate(pipeline);
+        let  [result,total] = await Promise.all([
+            User.aggregate(pipeline),
+            User.aggregate(pipelineCount)
+        ]) 
+        
         if (result) {
             return {
-                total: result.length,
+                total: total.length>0?total[0].total:total.length,
                 data: result,
             };
         } else {

@@ -6,7 +6,7 @@ const User = require("../model/users")
 const jobService = {
     getListJobsName: async(companyId)=>{
         try {
-            const jobsFound = await Job.find({companyId,  "status.value": jobDictionary.status.show.value }).select({"info.name": 1, "info.recruitmentProcess": 1})
+            const jobsFound = await Job.find({companyId,  "status.value": jobDictionary.status.show.value , "info.outdate" : {$gt: new Date()}}).select({"info.name": 1, "info.recruitmentProcess": 1})
             if(jobsFound){
                 return jobsFound;
             }else{
