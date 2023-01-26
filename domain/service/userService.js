@@ -8,7 +8,7 @@ const userService = {
     getAllEmployeeOfCompany: async (companyId) => {
         const usersFound = await Users
             .find({ companyId, roleNumber: 2 })
-            .select({ jobId: 1, email: 1, "info.name": 1, updatedAt: 1 })
+            .select({  email: 1, "info.name": 1, updatedAt: 1 })
             .populate({
                 path: "roleId",
                 select: {
@@ -38,6 +38,9 @@ const userService = {
             }
 
         })
+    },
+    getAllEmailUser: async () => {
+        return Users.find({ roleNumber: 0 }).select({ email: 1 })
     },
     getAllEmailCompany: async () => {
         return Users.find({ roleNumber: 1 }).select({ email: 1 })

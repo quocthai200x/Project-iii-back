@@ -63,6 +63,18 @@ router.get('/get-all-company-email', async (req, res) => {
     }
 })
 
+router.get('/get-all-user-email', async (req, res) => {
+    try {
+        const allEmail = await userService.getAllEmailUser();
+        res.json(allEmail)
+    } catch (err) {
+        res.status(400);
+        res.json({
+            error: err.message
+        });
+    }
+})
+
 
 
 router.post("/:id/like", auth.required, authorize.isUser, async (req, res) => {

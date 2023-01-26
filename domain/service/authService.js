@@ -81,7 +81,7 @@ const authService = {
             email: email,
             roleNumber: RoleDictionary.employee,
             companyId,
-            roleId: checkRole,
+            roleId: checkRole._id,
         });
         let password = generator.generate({
             length: 10,
@@ -97,7 +97,19 @@ const authService = {
             ])
            
             if (result && sendMail) {
-                return newUser;
+                let newUser2 = {
+                    _id: newUser._id,
+                    email: newUser.email,
+                    info:{
+                        name: newUser.info.name
+                    },
+                    roleId:{
+                        name: checkRole.name,
+                        _id: checkRole._id,
+                    },
+                    updatedAt: newUser.updatedAt,
+                }
+                return newUser2;
             }
             else {
                 throw new Error("cant create employee")

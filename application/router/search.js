@@ -33,8 +33,9 @@ router.post("/company" , async(req,res)=>{
 
 router.post("/candidate", auth.required, authorize.canSearchCandidate,  async(req,res)=>{
     try {
-        // const {index} = req.params
-        const result = await searchService.searchCandidate(req.body);
+        const {pageNumber, limit} = req.query
+        const {companyId } = req
+        const result = await searchService.searchCandidate( companyId, req.body , pageNumber, limit);
         res.json(result);
     } catch (err) {
         res.status(400);

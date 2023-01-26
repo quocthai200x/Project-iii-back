@@ -30,19 +30,19 @@ const SearchService = {
             let workingAreaName = companyFound.info.workingArea.map(ele => ele.name);
             let locationProvince = companyFound.info.location.map(ele => ele.province);
             let keywords = []
-            jobsFound.forEach(job=>{
-                job.info.workingAddress.forEach(location=>{
-                    if(!locationProvince.includes(location.province)){
+            jobsFound.forEach(job => {
+                job.info.workingAddress.forEach(location => {
+                    if (!locationProvince.includes(location.province)) {
                         locationProvince.push(location.province)
                     }
                 })
-                job.info.type.forEach(type=>{
-                    if(!workingAreaName.includes(type.name)){
+                job.info.type.forEach(type => {
+                    if (!workingAreaName.includes(type.name)) {
                         workingAreaName.push(type.name)
                     }
                 })
-                job.info.keyword.forEach(keyword=>{
-                    if(!keywords.includes(keyword)){
+                job.info.keyword.forEach(keyword => {
+                    if (!keywords.includes(keyword)) {
                         keywords.push(keyword)
                     }
                 })
@@ -54,16 +54,16 @@ const SearchService = {
                         $text: {
                             $search: strKeyword,
                         },
-                        
+
                         roleNumber: 0, "info.allowSearchInfo": true,
                     }
                 },
                 {
                     $project: {
                         _id: "$_id",
-                        info:  "$info",
-                        email: "$email" ,
-                        textScore: {$meta: "textScore"},
+                        info: "$info",
+                        email: "$email",
+                        textScore: { $meta: "textScore" },
                     }
                 },
                 { $unwind: { path: "$info.typeWorking", preserveNullAndEmptyArrays: true } },
@@ -73,10 +73,10 @@ const SearchService = {
                         count: { $sum: { $size: { $filter: { input: workingAreaName, as: "item", cond: { $in: ["$info.typeWorking.name", ["$$item"]] } } } } },
                         info: { $first: "$info" },
                         email: { $first: "$email" },
-                        textScore: {$first: "$textScore"},
+                        textScore: { $first: "$textScore" },
                     }
                 },
-                
+
                 {
                     $project: {
                         // your project fields
@@ -109,13 +109,25 @@ const SearchService = {
                 },
                 {
                     $sort: {
-                     
+
                         score: -1
                     }
                 },
                 {
                     $project: {
-                        info: 1,
+                        "info.name": 1,
+                        "info.avatar": 1,
+                        // "info.address": 1,
+                        // 'info.ward': 1,
+                        // "info.district":1,
+                        "info.city": 1,
+                        "info.skills": 1,
+                        "info.positionPresent": 1,
+                        "info.yearExperienced": 1,
+                        "info.salaryTarget": 1,
+                        // "info.workingLocationTarget": 1,
+                        // "info.dob":1,
+                        // "info.typeWorking.name": 1,
                         email: 1,
                         score: 1
                     }
@@ -189,7 +201,19 @@ const SearchService = {
                 },
                 {
                     $project: {
-                        info: 1,
+                        "info.name": 1,
+                        "info.avatar": 1,
+                        // "info.address": 1,
+                        // 'info.ward': 1,
+                        // "info.district":1,
+                        "info.city": 1,
+                        "info.skills": 1,
+                        "info.positionPresent": 1,
+                        "info.yearExperienced": 1,
+                        "info.salaryTarget": 1,
+                        // "info.workingLocationTarget": 1,
+                        // "info.dob":1,
+                        // "info.typeWorking.name": 1,
                         email: 1,
                         score: 1
                     }
@@ -205,7 +229,7 @@ const SearchService = {
                 data: result,
             };
 
-        }else{
+        } else {
             throw new Error("Not found")
         }
     },
@@ -228,9 +252,9 @@ const SearchService = {
         // console.log(newQuery)
         let result;
         if (keyword) {
-            result = await Company.find(newQuery).sort({ score: { $meta: "textScore" } }).limit(limit).skip(limit * pageNumber)
+            result = await Company.find(newQuery).select({ "info.name": 1, "info.logo": 1, "info.workingArea.name": 1 }).sort({ score: { $meta: "textScore" } }).limit(limit).skip(limit * pageNumber)
         } else {
-            result = await Company.find(newQuery).limit(limit).skip(limit * pageNumber)
+            result = await Company.find(newQuery).select({ "info.name": 1, "info.logo": 1, "info.workingArea.name": 1 }).limit(limit).skip(limit * pageNumber)
         }
 
         const count = await Company.find(newQuery).count()
@@ -259,34 +283,181 @@ const SearchService = {
         // console.log(newQuery)
         let result;
         if (body.text) {
-            result = await Job.find(newQuery).sort({ score: { $meta: "textScore" } }).limit(limit).skip(limit * pageNumber).select({ status: 0 }).populate({ path: "companyId", select: { "info.name": 1, "info.benefits": 1, "info.logo": 1 } });
+            result = await Job.find(newQuery).sort({ score: { $meta: "textScore" } }).limit(limit).skip(limit * pageNumber)
+                // .select({ status: 0, "info.name": 1, 'info.type': 1, "info.workingAddress.province": 1, "info.salaryRate": 1, "info.keyword": 1, "info.outdate": 1, "info.createdAt": 1, "info.updatedAt": 1 })
+                .select({
+                    companyId: 1,
+                    // status: 0,
+                    info: {
+                        name :1,
+                        type: {
+                            name: 1,
+                        },
+                        workingAddress: {
+                            province: 1,
+                        },
+                        salaryRate: 1,
+                        keyword: 1,
+                        outdate: 1,
+                        
+                    },
+                    createdAt: 1,
+                    updatedAt: 1,
+                })
+
+                .populate({ path: "companyId", select: { "info.name": 1, "info.logo": 1 } });
         } else {
-            result = await Job.find(newQuery).sort({ 'info.outdate': 1 }).limit(limit).skip(limit * pageNumber).select({ status: 0 }).populate({ path: "companyId", select: { "info.name": 1, "info.benefits": 1, "info.logo": 1 } });
+            result = await Job.find(newQuery).sort({ 'info.outdate': 1 }).limit(limit).skip(limit * pageNumber)
+                // .select({ status: 0, "info.name" : 1, 'info.type' : 1 , "info.workingAddress.province": 1, "info.salaryRate": 1, "info.keyword": 1, "info.outdate": 1 ,"info.createdAt": 1, "info.updatedAt":1})
+                .select({
+                    companyId: 1,
+                    // status: 0,
+                    info: {
+                        name :1,
+                        type: {
+                            name: 1,
+                        },
+                        workingAddress: {
+                            province: 1,
+                        },
+                        salaryRate: 1,
+                        keyword: 1,
+                        outdate: 1,
+                        
+                    },
+                    createdAt: 1,
+                    updatedAt: 1,
+                })
+                .populate({ path: "companyId", select: { "info.name": 1, "info.logo": 1 } });
         }
-        const count = await Job.find(newQuery).count()
         //TO DO: làm thêm filter skip limit offset
         if (result) {
-            return { total: count, data: result };
+            return { total: result.length, data: result };
         } else {
             throw new Error(" error")
         }
     },
-    searchCandidate: async (body, pageNumber, limit) => {
-        let query = {};
-        if (body.text) {
-            query.$text = {}
-            query.$text.$search = body.text;
+    searchCandidate: async (companyId, body, pageNumber, limit) => {
+        // let query = {};
+        // let result = null;
+        if (!pageNumber) {
+            pageNumber = 0
         }
-        let newQuery = { ...query, roleNumber: 0, "info.allowSearchInfo": true, ...body.filter, }
-        // console.log(newQuery)
-        const result = await User.find(newQuery).sort({ score: { $meta: "textScore" } }).limit(limit).skip(limit * pageNumber).select({ info: 1, email: 1 })
-        //TO DO: làm thêm filter skip limit offset
+        if (!limit) {
+            limit = 10
+        }
+        pageNumber = parseInt(pageNumber)
+        limit = parseInt(limit)
+        let candidateIds = await Application.distinct('candidateId', { companyId })
+        //     if (body.text) {
+        //         query.$text = {}
+        //         query.$text.$search = body.text;
+        //         let newQuery = { ...query,"_id":{"$nin": candidateIds}  , roleNumber: 0, "info.allowSearchInfo": true, ...body.filter, }
+        //         // console.log(newQuery)
+        //         result = await User.find(newQuery).sort({ score: { $meta: "textScore" } }).limit(limit).skip(limit * pageNumber).select({ info: 1, email: 1 })
+        //         //TO DO: làm thêm filter skip limit offset
+        //         if (result) {
+        //             return {
+        //                 total: result.length,
+        //                 data: result,
+        //             };
+        //         } else {
+        //             throw new Error(" error")
+        //         }
+        //     }else{
+        //         let newQuery = {roleNumber: 0,  ...query,"_id":{"$nin": candidateIds}  ,  "info.allowSearchInfo": true, ...body.filter, }
+        //         result = await User.find(newQuery).sort({ updatedAt: 1 }).limit(limit).skip(limit * pageNumber).select({ info: 1, email: 1 })
+        //         if (result) {
+        //             return {
+        //                 total: result.length,
+        //                 data: result,
+        //             };
+        //         } else {
+        //             throw new Error(" error")
+        //         }
+        //     }
+
+        let pipeline = [
+            // exclude candidates that already exist in the 'Application' collection
+            // perform text search if 'body.text' is present
+            ...(body.text
+                ? [
+                    {
+                        $match: {
+                            $text: {
+                                $search: body.text,
+                            },
+                        },
+                    },
+                    {
+                        $sort: {
+                            score: { $meta: "textScore" },
+                        },
+                    },
+                ]
+                : []),
+            // sort results by 'updatedAt' field if 'body.text' is not present
+            ...(!body.text
+                ? [
+                    {
+                        $sort: {
+                            updatedAt: 1,
+                        },
+                    },
+                ]
+                : []),
+            {
+                $match: {
+                    roleNumber: 0,
+                    "info.allowSearchInfo": true,
+                    ...body.filter,
+                    _id: { $nin: candidateIds },
+                },
+            },
+
+            // filter results based on 'roleNumber', 'info.allowSearchInfo', and other fields in the 'body.filter' object
+
+
+
+
+            // limit and skip results based on 'limit' and 'pageNumber' values
+            {
+                $skip: limit * pageNumber,
+            },
+            {
+                $limit: limit,
+            },
+            // select only the 'info' and 'email' fields from the resulting documents
+            {
+                $project: {
+                    "info.name": 1,
+                    "info.avatar": 1,
+                    "info.address": 1,
+                    'info.ward': 1,
+                    "info.district": 1,
+                    "info.city": 1,
+                    "info.skills": 1,
+                    "info.positionPresent": 1,
+                    "info.yearExperienced": 1,
+                    "info.salaryTarget": 1,
+                    "info.workingLocationTarget": 1,
+                    "info.dob": 1,
+                    "info.typeWorking.name": 1,
+                    email: 1,
+                },
+            },
+        ];
+        let result = await User.aggregate(pipeline);
         if (result) {
-            return result;
+            return {
+                total: result.length,
+                data: result,
+            };
         } else {
-            throw new Error(" error")
+            throw new Error("error");
         }
     }
+
 }
 
 
