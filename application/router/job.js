@@ -183,17 +183,17 @@ router.get("/count-in-field/:field", async (req, res) => {
     }
 })
 
-// router.put('/update-model-all', async  (req, res) => {
-//     try {
-//         const updatedJob = await jobService.updateModel();
-//         res.json(updatedJob);
-//     } catch (err) {
-//         res.status(400);
-//         res.json({
-//             code: err.message
-//         })
-//     }
-// })
+router.put('/update-model-all', async  (req, res) => {
+    try {
+        const updatedJob = await jobService.updateModel();
+        res.json(updatedJob);
+    } catch (err) {
+        res.status(400);
+        res.json({
+            code: err.message
+        })
+    }
+})
 
 
 // router.get("/",auth.required ,async (req, res) => {

@@ -350,7 +350,7 @@ const SearchService = {
         }
         pageNumber = parseInt(pageNumber)
         limit = parseInt(limit)
-        let candidateIds = await Application.distinct('candidateId', { companyId })
+        // let candidateIds = await Application.distinct('candidateId', { companyId })
 
         let pipelineCount =  [
             ...(body.text
@@ -371,7 +371,7 @@ const SearchService = {
                     roleNumber: 0,
                     "info.allowSearchInfo": true,
                     ...body.filter,
-                    _id: { $nin: candidateIds },
+                    // _id: { $nin: candidateIds },
                 },
             },
 
@@ -416,7 +416,7 @@ const SearchService = {
                     roleNumber: 0,
                     "info.allowSearchInfo": true,
                     ...body.filter,
-                    _id: { $nin: candidateIds },
+                    // _id: { $nin: candidateIds },
                 },
             },
 

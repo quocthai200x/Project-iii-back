@@ -235,32 +235,35 @@ const jobService = {
         }
     },
     updateModel: async () => {
-        const jobFound = await Job.find();
-        jobFound.forEach((job, index) => {
-            let newJobInfo = job.info
-            newJobInfo.benefits = []
-            for (let index = 0; index < 5; index++) {
-                newJobInfo.benefits.push({
-                    svg: "family_restroom",
-                    desc: "Lương thưởng tháng thứ 13 hấp dẫn người ứng viên nên là hãy ứng tuyển đi",
-                    label: "Gia đình",
-                })
+        let benefits = []
+        for (let index = 0; index < 3; index++) {
+            benefits.push({
+                svg: "family_restroom",
+                desc: "Lương thưởng tháng thứ 13 hấp dẫn người ứng viên nên là hãy ứng tuyển đi",
+                label: "Gia đình",
+            })
+        }
+        Job.updateMany({}, {
+            $set: {
+                status: {
+                    name: "Đang hiển thị",
+                    value: 0
+                },
+                // "info.benefits": benefits
             }
-            job.info = newJobInfo
-            let res = job.save();
-            if (index == jobFound.length - 1) {
-                if (res) {
-                    return res
-                } else {
-                    throw new Error("Lỗi")
-                }
+        }, function (err, affected) {
+            if (err) {
+                throw new Error("Some thing wrong")
+            } else {
+                console.log('Updated %d documents', affected);
+                return affected
             }
+        });
 
-
-        })
+       
     }
-}
 
+}
 // const jobService = {
 //     getJob: () => {
 //         return Job.find({});
